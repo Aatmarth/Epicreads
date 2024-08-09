@@ -1,0 +1,333 @@
+<%- include("../partials/admin/header.ejs") %>
+<style>
+    .btn-list, .btn-unlist, .btn-edit, .btn-save {
+        transition: background-color 0.3s ease;
+        color: white;
+        border: none;
+        height: 30px;
+        text-decoration: none;
+    }
+
+    .btn-list {
+        background-color: #1CC0A0; /* Blue-Green Theme */
+    }
+
+    .btn-unlist {
+        background-color: #ff0000;
+    }
+
+    .btn-edit {
+        background-color: #007bff; /* Blue color */
+    }
+
+    .btn-save {
+        background-color: #26924a;
+        margin-top: 10px;
+    }
+
+    .btn-list:hover, .btn-unlist:hover, .btn-edit:hover, .btn-save:hover {
+        background-color: #ffffff !important;
+    }
+
+    .search-container {
+        position: relative;
+    }
+
+    .search-container input {
+        width: 100%;
+        height: 30px;
+        padding-right: 50px;
+    }
+
+    .search-container button {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        background-color: #1CC0A0; /* Blue-Green Theme */
+        border: none;
+        color: white;
+        padding: 0 12px;
+        cursor: pointer;
+    }
+
+    .container {
+        display: flex;
+    }
+
+    .categories-list {
+        width: 70%;
+        margin-right: 5%;
+    }
+
+    .category-form {
+        width: 30%;
+    }
+
+    .table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0 auto;
+        height: 15rem;
+    }
+
+    .table th, .table td {
+        border: 1px solid #000000; /* Adds border to each cell */
+        padding: 8px; /* Adds padding to cells */
+        text-align: left; /* Aligns text to the start of the cell */
+    }
+
+    .table thead {
+        background-color: #1CC0A0;
+        color: white;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    .table tbody tr:hover {
+        background-color: #d1e7dd;
+    }
+
+    .search-container {
+        width: 50%;
+        margin: 20px auto;
+    }
+
+    h1, h2 {
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+    }
+</style>
+</head>
+<body>
+
+<div class="container text-black mt-5">
+    <div class="categories-list card border border-black ">
+        <div class="card-body">
+            <h1 class="display-6">Categories</h1>
+            <form action="/admin/categories" method="get">
+                <div class="search-container d-flex">
+                    <input type="text" class="form-control" id="search-input" placeholder="Search for a category">
+                    <button id="search-button">Search</button>
+                </div>
+            </form>
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Category Description</th>
+                        <th style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% data.reverse().forEach((category, index)=>{ %>
+                    <tr>
+                        <td><%= category.name %></td>
+                        <td><%= category.description %></td>
+                        <td class="action-buttons">
+                            <% if(data.isListed==0){ %>
+                            <button class="btn btn-list">
+                                <a href="/admin/listCategory?id=<%= data._id %>" style="text-decoration: none; color: white;">List</a>
+                            </button>
+                            <% }else{ %>
+                            <button class="btn btn-unlist">
+                                <a href="/admin/unlistCategory?id=<%= data._id %>" style="text-decoration: none; color: white;">Unlist</a>
+                            </button>
+                            <% } %>
+                            <button class="btn btn-edit" onclick="editCategory('<%= data._id %>', '<%= data.name %>', '<%= data.description %>')">Edit</button>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+            <div class="pagination-container">
+                <a href="#">&laquo; Previous</a>
+                <span class="current-page"></span>
+                <a href="#"></a>
+                <a href="#">Next &raquo;</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="category-form card">
+        <div class="card-body">
+            <h2 id="form-title">Add Category</h2>
+            <form action="/admin/saveCategory" onsubmit="return handleFormSubmit(event)" method="post" id="category-form">
+                <input type="hidden" name="id" id="category-id">
+                <div class="form-group">
+                    <label for="category-name">Category Name</label>
+                    <input type="text" name="name" id="category-name" class="form-control" >
+                    <div id="name-error" class="error-message" style="color: red; display: none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="category-description">Category Description</label>
+                    <input type="text" id="descriptionId" name="description" class="form-control" rows="4" ></input>
+                    <div id="description-error" class="error-message" style="color: red; display: none;"></div>
+                </div>
+                <button type="submit" class="btn btn-save">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div>
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <% for(let i=1; i<=totalPages; i++){ %>
+            <li class="page-item <%=(i===currentPage)? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            </li>
+            <% } %>
+        </ul>
+    </nav>
+</div>
+
+<script>
+    function editCategory(id, name, description) {
+        document.getElementById('category-id').value = id;
+        document.getElementById('category-name').value = name;
+        document.getElementById('category-description').value = description;
+        document.getElementById('form-title').innerText = 'Edit Category';
+        document.getElementById('category-form').action = '/admin/updateCategory';
+    }
+</script>
+<script>
+    function handleFormSubmit(event) {
+        event.preventDefault();
+        if(!validateForm()) {
+            return;
+        }
+        const name= document.getElementsByName("name")[0].value;
+        const description = document.getElementById("descriptionId").value.trim();
+
+        fetch("/admin/addCategory", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({name,description})
+    })
+    .then(response=>{
+        if(!response.ok){
+            return response.json().then(err=>{
+                throw new Error(err.error);
+            })
+        }
+        return response.json();
+    })
+    .then(data=>{
+        location.reload();
+    })
+    .catch(error=>{
+        if(error.message==="Category already exists"){
+            Swal.fire({
+                icon:'error',
+                title:"Oops!",
+                text: "Category already exists"
+            })
+        }else{
+            Swal.fire({
+                icon:'error',
+                title:"Oops!",
+                text: "Something went wrong while adding category"
+            })
+        }
+        console.error(error.message, " from handleFormSubmit")
+    })
+}
+
+// function handleFormSubmit(event) {
+//     event.preventDefault();
+//     if(!validateForm()) {
+//         return;
+//     }
+//     const name= document.getElementsByName("name")[0].value;
+//     const description = document.getElementById("descriptionId").value.trim();
+
+//     fetch("/admin/addCategory", {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json"
+//         },
+//         body: JSON.stringify({name,description})
+//     })
+//     .then(response=>{
+//         if(!response.ok){
+//             return response.json().then(err=>{
+//                 throw new Error(err.error)
+//             })
+//         }
+//         return response.json();
+//     })
+//     .then(data=>{
+//         location.reload();
+//     })
+//     .catch(err=>{
+//         if(error.message==="Category already exists"){
+//             Swal.fire({
+//                 icon:'error',
+//                 title:"Oops!",
+//                 text: "Category already exists"
+//             })
+//         }else{
+//             Swal.fire({
+//                 icon:'error',
+//                 title:"Oops!",
+//                 text: "Something went wrong"
+//             })
+//         }
+//     })
+// }
+
+function validateForm() {
+    clearErrorMessages();
+    const name= document.getElementsByName("name")[0].value.trim();
+    const description = document.getElementById("descriptionId").value.trim();
+    isValid = true;
+ 
+    if(name==""){
+        displayErrorMessage("name-error","Please enter a name");
+        isValid = false;
+    }else if(!/^[a-zA-Z\s]+$/.test(name)){
+        displayErrorMessage("name-error","Category name must contain only letters and spaces");
+        isValid = false;
+    }
+    if(description===""){
+        displayErrorMessage("description-error","Please enter a description");
+        isValid = false;
+    }
+    return isValid;
+}
+
+function displayErrorMessage(elementId, message){
+    var errorElement = document.getElementById(elementId);
+    errorElement.innerText = message;
+    errorElement.style.display = "block";
+}
+
+function clearErrorMessages(){
+    const errorElements = document.getElementsByClassName("error-message");
+    Array.from(errorElements).forEach((element)=>{
+        element.innerText="",
+        element.style.display = "none";
+    });
+}
+</script>
+
+        <%- include("../partials/admin/footer.ejs") %>

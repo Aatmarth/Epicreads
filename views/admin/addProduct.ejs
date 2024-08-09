@@ -1,0 +1,84 @@
+<%- include("../partials/admin/header.ejs") %>
+
+    <div class="container form-container">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Add Product</h4>
+            </div>
+            <div class="card-body">
+                <form action="/admin/addProduct" method="POST" enctype="multipart/form-data">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="productName">Product Name</label>
+                            <input type="text" class="form-control" id="productName" name="productName" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="category">Author</label>
+                            <input type="text" class="form-control" id="author" name="author" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="category">Category</label>
+                            <input type="text" class="form-control" id="category" name="category" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="productDescription">Description</label>
+                        <textarea class="form-control" id="productDescription" name="productDescription" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="productPrice">Price</label>
+                            <input type="number" class="form-control" id="productPrice" name="productPrice" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="offerPrice">Offer Price</label>
+                            <input type="number" class="form-control" id="offerPrice" name="offerPrice">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="pageCount">Page Count</label>
+                            <input type="number" class="form-control" id="pageCount" name="pageCount" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productImage">Product Image</label>
+                        <input type="file" class="form-control-file" id="productImage" name="productImage" multiple required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select class="form-control" id="status" name="status" required>
+                            <option value="Available">Available</option>
+                            <option value="Sold out">Sold out</option>
+                            <option value="Discontinued">Discontinued</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Add Product</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .form-container {
+            margin-top: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <%- include("../partials/admin/footer.ejs") %>
