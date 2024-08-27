@@ -6,12 +6,17 @@ const productSchema = new Schema({
         type: String,
         required : true
     },
-    author: {
+    authorname: {
         type: String,
         required: true
     },
+    publishedYear: {
+        type: Number,
+        required: true
+    },
     category: { 
-        type: String,
+        type: Schema.Types.ObjectId,
+        ref: "Category",        
         required: true
     },
     productDescription: {
@@ -38,9 +43,9 @@ const productSchema = new Schema({
         type: [String],
         required: true
     },
-    isBlocked:{
+    isListed:{
         type:Boolean,
-        default:false
+        default:true
     },
     status:{
         type:String,

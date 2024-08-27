@@ -8,6 +8,8 @@ const passport= require("./config/passport")
 const db=require("./config/db");
 const userRouter=require("./routes/userRouter");
 const adminRouter=require("./routes/adminRouter");
+const Category = require("./models/categorySchema");
+
 
 db();
 
@@ -32,6 +34,15 @@ app.use((req,res,next)=>{
     res.set('cache-control','no-store')
     next();
 })
+app.use(async (req, res, next) => {
+  try {
+      const category = await Category.find({}); 
+      res.locals.category = category;
+      next();
+  } catch (error) {
+      next(error);
+  }
+});
 
 app.set("view engine","ejs");
 app.set("views",[path.join(__dirname,"views/admin"),path.join(__dirname,"views/user")]);

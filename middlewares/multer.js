@@ -2,7 +2,7 @@ const multer = require('multer');
 const path = require('path');
 
 // Configure multer for file uploads
-const storage = multer.diskStorage({
+const storageProduct = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'public/productImages');
     },
@@ -11,6 +11,20 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage });
+const uploadProduct = multer({ storage: storageProduct });
 
-module.exports = upload;
+const storageCategory = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'public/categoryImages');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const uploadCategory = multer({ storage: storageCategory });
+
+module.exports = {
+    uploadProduct,
+    uploadCategory
+};

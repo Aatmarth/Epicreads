@@ -1,0 +1,165 @@
+<%- include("../partials/admin/header.ejs") %>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 mt-3">
+                <form class="border p-4 rounded">
+                    <div class="d-flex justify-content-center mt-3">
+                        <h2 class="text-center">Edit Category</h2>
+                    </div>
+                    <div class="mb-4 mt-30">
+                        <label for="product_name" class="form-label">Category Name</label>
+                        <input type="text" name="name" value="<%= category.name %>" class="form-control border" />
+                        <div id="name-error" class="error-message" style="color: red; display: none;"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Category Description</label>
+                        <input id="descriptionId" name="description" value="<%= category.description %>"
+                            class="form-control border"></input>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Existing Images</label>
+                        <div id="existing-images" class="d-flex flex-wrap">
+                            <% if (category.categoryImage && category.categoryImage.length> 0) { %>
+                                <% category.categoryImage.forEach(function(image, index) { %>
+                                    <div class="me-2">
+                                        <img src="/categoryImages/<%= image %>" alt="Image <%= index + 1 %>"
+                                            class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                                    </div>
+                                    <% }); %>
+                                        <% } else { %>
+                                            <p>No images available.</p>
+                                            <% } %>
+                        </div>
+                        <p>Total Images: <%= category.categoryImage ? category.categoryImage.length : 0 %>
+                        </p>
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <label for="categoryImage">Upload New Image</label>
+                        <input type="file" class="form-control-file" id="categoryImage" name="categoryImage">
+                        <div id="image-error" class="error-message" style="color: red; display: none;"></div>
+                    </div>
+                    <button type="submit" onclick="handleFormSubmit(event)"
+                        class="btn btn-primary btn-save">Edit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
+
+            const formData = new FormData();
+            const name = document.getElementsByName("name")[0].value.trim();
+            const description = document.getElementById("descriptionId").value.trim();
+            const imageInput = document.getElementById("categoryImage");
+            console.log(name, description, imageInput.files[0]);
+            formData.append("name", name);
+            formData.append("description", description);
+            if (imageInput.files.length > 0) {
+                formData.append("categoryImage", imageInput.files[0]);
+            }
+
+            const existingImages = Array.from(document.getElementsByName('existingImages[]')).map(input => input.value);
+            existingImages.forEach(image => formData.append("existingImages[]", image));
+
+
+            console.log(formData);
+
+
+            fetch("/admin/editCategory/<%= category._id %>", {
+                method: "POST",
+                body: formData
+            })
+                .then(response => {
+                    console.log(response);
+
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.error);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Category Updated!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    setTimeout(() => {
+                        window.location.href = "/admin/categories";
+                    }, 1000)
+
+                })
+                .catch(error => {
+                    if (error.message === "Category already exists") {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Oops!",
+                            text: "Category already exists"
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Oops!",
+                            text: "Something went wrong while adding category"
+                        });
+                    }
+                    console.error(error.message, " from handleFormSubmit");
+                });
+        }
+
+
+        function validateForm() {
+            clearErrorMessages();
+            const name = document.getElementsByName("name")[0].value.trim();
+            const description = document.getElementById("descriptionId").value.trim();
+            const imageInput = document.getElementById("categoryImage");
+
+            const imageFiles = imageInput.files;
+            let isValid = true;
+
+            if (name == "") {
+                displayErrorMessage("name-error", "Please enter a name");
+                isValid = false;
+            }
+            if (description === "") {
+                displayErrorMessage("description-error", "Please enter a description");
+                isValid = false;
+            }
+            console.log(isValid);
+
+            return isValid;
+        }
+
+        function displayErrorMessage(elementId, message) {
+            var errorElement = document.getElementById(elementId);
+            errorElement.innerText = message;
+            errorElement.style.display = "block";
+        }
+
+        function clearErrorMessages() {
+            const errorElements = document.getElementsByClassName("error-message");
+            Array.from(errorElements).forEach((element) => {
+                element.innerText = "",
+                    element.style.display = "none";
+            });
+        }
+
+    </script>
+
+
+
+    <%- include("../partials/admin/footer.ejs") %>

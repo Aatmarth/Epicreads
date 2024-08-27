@@ -4,21 +4,27 @@ const env= require("dotenv").config();
 const bcrypt = require("bcrypt");
 const e = require("express");
 const Product = require("../../models/productSchema");
+const Category = require("../../models/categorySchema");
 
 
 
 const loadhome= async(req,res)=>{
     try {
-        const user= req.session.user;
-        const products = await Product.find({});
-        console.log(products);
-        
-        if(user){
+        const products = await Product.find({ isListed: true }).populate({ path: 'category', match: { isListed: true } })
+        const filteredProducts = products.filter(product => product.category);
+        const category = await Category.find({}).sort({name:1})
+        const newArrivals=await Product.find({ isListed: true }).populate({ path: 'category', match: { isListed: true } }).sort({createdAt:-1});
+        const filteredProductNewArrivals = products.filter(product => product.category);
+
+        if(req.session.user){
+            const user= req.session.user;
             const userData = await User.findOne({_id:user});
             console.log(userData);
-            res.render("homepage",{user:userData,products:products});
+          
+            res.render("homepage",{user:userData,products:filteredProducts,categories:category,newArrivals:filteredProductNewArrivals});
         }else{
-            res.render("homepage",{products:products});
+            
+            res.render("homepage",{products:filteredProducts,categories:category,newArrivals:filteredProductNewArrivals});
         }
     } catch (error) {
         console.log(error.message+"home page not found");
@@ -69,7 +75,8 @@ const register = async(req,res)=>{
 
         const findUser = await User.findOne({email});
         if(findUser){
-            return res.render("homepage",{message:"User with this email already exists"})
+            const products = await Product.find({});
+            return res.render("register",{message:"User with this email already exists",products:products})
         }
 
         const otp= generateOtp();
@@ -122,7 +129,7 @@ const verifyOtp = async(req,res)=>{
             req.session.user = saveUserData._id;
             console.log(saveUserData);
             
-            res.json({success:true, redirectUrl:"/"})
+            res.json({success:true, redirectUrl:"/logIn"})
         }else{
             res.status(400).json({success:false, message:"Invalid OTP. Please try again"})
         }
@@ -163,14 +170,14 @@ const login= async(req,res)=>{
         const {email,password} = req.body;
         const findUser = await User.findOne({isAdmin:0, email:email});
         if(!findUser){
-            return res.render("homepage",{message:"User not found"});
+            return res.render("logIn",{message:"User not found"});
         }
         if(findUser.isBlocked){
-            return res.render("homepage",{message:"User is blocked by admin"});
+            return res.render("logIn",{message:"User is blocked by admin"});
         }
         const passwordMatch = await bcrypt.compare(password,findUser.password);
         if(!passwordMatch){
-            return res.render("homepage",{message:"Invalid Password"});
+            return res.render("logIn",{message:"Invalid Password"});
         }
         req.session.user = findUser._id;
         res.redirect("/");
@@ -182,18 +189,79 @@ const login= async(req,res)=>{
 
 const logout= async(req,res)=>{
     try {
-        req.session.destroy((err)=>{
-            if(err){
-                console.error("Session Destruction error",err.message);
-                res.status(500).send("Server error");
-            }
-            return res.redirect("/");
-        })
+        // req.session.destroy((err)=>{
+        //     if(err){
+        //         console.error("Session Destruction error",err.message);
+        //         res.status(500).send("Server error");
+        //     }
+        //     return res.redirect("/");
+        // });
+        req.session.user = null;
+        return res.redirect("/");
     } catch (error) {
         console.error(error.message+" error in logout");
         res.status(500).send("Server error");
     }
 }
+
+
+
+
+const loadProductPage = async(req,res)=>{
+    try {
+        const productId = req.query.id;
+        const product= await Product.findById(productId).populate('category')
+        const relatedProducts = await Product.find({category:product.category}).limit(4);
+        // console.log(product);
+        
+        res.render("productPage",{product,relatedProducts});
+
+    } catch (error) {
+        console.log(error.message,"Error in load product page");
+        res.status(500).send("Internal server error")
+    }
+}
+
+
+
+
+
+
+
+const loadShop = async(req,res)=>{
+    try {
+        const category = await Category.find({});
+        const products = await Product.find({ isListed: true }).populate({ path: 'category', match: { isListed: true } })
+        const filteredProducts = products.filter(product => product.category);
+        res.render("shop",{categories:category,products:filteredProducts});
+    } catch (error) {
+        console.log(error.message,"Error in load category boxed");
+        res.status(500).send("Internal server error")
+    }
+}
+
+
+
+
+
+
+const loadLogin = async(req,res)=>{
+    try {
+        res.render("login");
+    } catch (error) {
+        console.log(error.message,"Error in load login");
+        res.status(500).send("Internal server error")
+    }
+}
+
+const loadRegister = async (req, res) => {
+    try {
+        res.render("register");
+    } catch (error) {
+        console.log(error.message, "Error in load register");
+        res.status(500).send("Internal server error");
+    }
+};
 
 
 module.exports={
@@ -202,7 +270,11 @@ module.exports={
     verifyOtp,
     resendOtp,
     login,
-    logout
+    logout,
+    loadProductPage,
+    loadShop,
+    loadLogin,
+    loadRegister
 };
 
 

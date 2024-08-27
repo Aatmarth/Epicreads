@@ -2363,7 +2363,6 @@ blockquote.text-white cite span {
     right: 0;
     bottom: 0;
     height: 1px;
-    background-color: #c96;
     transition: all .35s
 }
 
@@ -2452,7 +2451,7 @@ blockquote.text-white cite span {
     justify-content: center;
     position: static;
     line-height: 1.5;
-    flex-direction: column
+    flex-direction: column;
 }
 
 .menu-vertical li {
@@ -2576,7 +2575,7 @@ blockquote.text-white cite span {
 }
 
 .menu-vertical li>a {
-    color: #666;
+    color: #000000;
     font-weight: 300;
     font-size: 1.3rem;
     letter-spacing: 0;
@@ -2600,7 +2599,7 @@ blockquote.text-white cite span {
 
 .menu-vertical>li>a {
     display: block;
-    color: #666;
+    color: #000000;
     font-weight: 300;
     font-size: 1.4rem;
     line-height: 1.5;
@@ -2612,7 +2611,7 @@ blockquote.text-white cite span {
 }
 
 .menu-vertical>li.item-lead>a {
-    color: #333;
+    color: #000000;
     font-weight: 500;
     background-color: #f9f9f9
 }
@@ -2622,7 +2621,7 @@ blockquote.text-white cite span {
 }
 
 .menu-vertical .menu-title {
-    color: #333;
+    color: #000000;
     font-weight: 600;
     font-size: 1.4rem;
     letter-spacing: -.01em;
@@ -7805,7 +7804,7 @@ p {
     font-weight: 400;
     font-size: 1.6rem;
     line-height: 1.25;
-    color: #c96;
+    color: #1CC0A0;
     margin-bottom: 1.3rem
 }
 
@@ -7965,7 +7964,7 @@ p {
 }
 
 .product-action {
-    position: absolute;
+    position: relative;
     left: 0;
     right: 0;
     bottom: 0;
@@ -7986,15 +7985,16 @@ p {
     transform: translateY(0)
 }
 
-.action-icon-top {
-    padding-top: .8rem;
-    padding-bottom: .8rem
-}
+
 
 .action-icon-top .btn-product {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    flex-direction: column
+    display: flex;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    flex-direction: column;
+    background-color: #e5e5e5; 
+    text-decoration: none;
+
 }
 
 .action-icon-top .btn-product span {
@@ -8006,7 +8006,7 @@ p {
 }
 
 .btn-product {
-    color: #c96;
+    color: #cccccc;
     position: relative;
     display: flex;
     align-items: center;
@@ -8034,17 +8034,21 @@ p {
     font-weight: 400;
     font-size: 1.3rem;
     letter-spacing: -.01em;
-    transition: all .35s ease
+    transition: all .35s ease;
+    text-decoration:none;
+
 }
 
 .btn-product:hover,
 .btn-product:focus {
-    outline: none !important
+    outline: none !important;
+    
 }
 
 .btn-product:hover span,
 .btn-product:focus span {
-    color: #c96;
+    color: #fff;
+    text-decoration:none;
     box-shadow: 0 1px 0 0 #c96
 }
 
@@ -8109,6 +8113,7 @@ p {
 .btn-product-icon:focus {
     color: #fff;
     background-color: #c96
+  
 }
 
 .btn-product-icon+.btn-product-icon {
@@ -8120,7 +8125,8 @@ p {
 }
 
 .btn-wishlist {
-    font-size: 1.6rem
+    font-size: 1.6rem;
+    text-decoration: none;
 }
 
 .btn-wishlist:before {
@@ -8632,7 +8638,7 @@ p {
 .product.product-7 .btn-product {
     padding-top: 1.1rem;
     padding-bottom: 1.1rem;
-    color: #c96;
+    color: #1CCA0A;
     background-color: #fff;
     text-transform: uppercase;
     border-bottom: .1rem solid #ebebeb

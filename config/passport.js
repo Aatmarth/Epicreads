@@ -20,7 +20,8 @@ passport.use(new GoogleStatergy({
                     email: profile.emails[0].value,
                     googleId: profile.id
                 })
-                console.log(user)
+                console.log(user);
+                
                 await user.save();
                 return done(null, user);
             }

@@ -1,333 +1,337 @@
 <%- include("../partials/admin/header.ejs") %>
-<style>
-    .btn-list, .btn-unlist, .btn-edit, .btn-save {
-        transition: background-color 0.3s ease;
-        color: white;
-        border: none;
-        height: 30px;
-        text-decoration: none;
-    }
 
-    .btn-list {
-        background-color: #1CC0A0; /* Blue-Green Theme */
-    }
-
-    .btn-unlist {
-        background-color: #ff0000;
-    }
-
-    .btn-edit {
-        background-color: #007bff; /* Blue color */
-    }
-
-    .btn-save {
-        background-color: #26924a;
-        margin-top: 10px;
-    }
-
-    .btn-list:hover, .btn-unlist:hover, .btn-edit:hover, .btn-save:hover {
-        background-color: #ffffff !important;
-    }
-
-    .search-container {
-        position: relative;
-    }
-
-    .search-container input {
-        width: 100%;
-        height: 30px;
-        padding-right: 50px;
-    }
-
-    .search-container button {
-        position: absolute;
-        right: 0;
-        top: 0;
-        height: 100%;
-        background-color: #1CC0A0; /* Blue-Green Theme */
-        border: none;
-        color: white;
-        padding: 0 12px;
-        cursor: pointer;
-    }
-
-    .container {
-        display: flex;
-    }
-
-    .categories-list {
-        width: 70%;
-        margin-right: 5%;
-    }
-
-    .category-form {
-        width: 30%;
-    }
-
-    .table {
-        border-collapse: collapse;
-        width: 100%;
-        margin: 0 auto;
-        height: 15rem;
-    }
-
-    .table th, .table td {
-        border: 1px solid #000000; /* Adds border to each cell */
-        padding: 8px; /* Adds padding to cells */
-        text-align: left; /* Aligns text to the start of the cell */
-    }
-
-    .table thead {
-        background-color: #1CC0A0;
-        color: white;
-    }
-
-    .table tbody tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-
-    .table tbody tr:hover {
-        background-color: #d1e7dd;
-    }
-
-    .search-container {
-        width: 50%;
-        margin: 20px auto;
-    }
-
-    h1, h2 {
-        text-align: center;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    .form-group input, .form-group textarea {
-        width: 100%;
-        padding: 8px;
-        box-sizing: border-box;
-    }
-</style>
-</head>
-<body>
-
-<div class="container text-black mt-5">
-    <div class="categories-list card border border-black ">
-        <div class="card-body">
-            <h1 class="display-6">Categories</h1>
-            <form action="/admin/categories" method="get">
-                <div class="search-container d-flex">
-                    <input type="text" class="form-control" id="search-input" placeholder="Search for a category">
-                    <button id="search-button">Search</button>
-                </div>
-            </form>
-            <table class="table table-bordered mt-3">
-                <thead>
-                    <tr>
-                        <th>Category Name</th>
-                        <th>Category Description</th>
-                        <th style="width: 150px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% data.reverse().forEach((category, index)=>{ %>
-                    <tr>
-                        <td><%= category.name %></td>
-                        <td><%= category.description %></td>
-                        <td class="action-buttons">
-                            <% if(data.isListed==0){ %>
-                            <button class="btn btn-list">
-                                <a href="/admin/listCategory?id=<%= data._id %>" style="text-decoration: none; color: white;">List</a>
-                            </button>
-                            <% }else{ %>
-                            <button class="btn btn-unlist">
-                                <a href="/admin/unlistCategory?id=<%= data._id %>" style="text-decoration: none; color: white;">Unlist</a>
-                            </button>
+    <div class="container text-black mt-5">
+        <div class="categories-list card border border-black">
+            <div class="card-body">
+                <h1 class="display-6">Categories</h1>
+                <form action="/admin/categories" method="get">
+                    <div class="search-container d-flex">
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="search-input" 
+                            name="search" 
+                            placeholder="Search for a category" 
+                            value="<%= searchQuery %>">
+                        <button id="search-button" class="btn btn-primary ms-2">Search</button>
+                    </div>
+                </form>
+        
+                <table class="table table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>Category Name</th>
+                            <th>Category Description</th>
+                            <th>Category Image</th>
+                            <th style="width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% data.forEach((category) => { %>
+                            <tr>
+                                <td><%= category.name %></td>
+                                <td><%= category.description %></td>
+                                <td>
+                                    <% if (category.categoryImage && category.categoryImage.length > 0) { %>
+                                        <div class="d-flex flex-wrap">
+                                            <% category.categoryImage.forEach((image, index) => { %>
+                                                <img 
+                                                    src="/categoryImages/<%= image %>" 
+                                                    alt="Image <%= index + 1 %>" 
+                                                    class="img-thumbnail me-2" 
+                                                    style="max-width: 150px; max-height: 100px;" />
+                                            <% }); %>
+                                        </div>
+                                    <% } else { %>
+                                        <p>No images available.</p>
+                                    <% } %>
+                                </td>
+                                <td class="action-buttons">
+                                    <% if (!category.isListed) { %>
+                                        <button class="btn btn-list">
+                                            <a href="/admin/toggleCategory?id=<%= category._id %>" style="text-decoration: none; color: white;">List</a>
+                                        </button>
+                                    <% } else { %>
+                                        <button class="btn btn-unlist">
+                                            <a href="/admin/toggleCategory?id=<%= category._id %>" style="text-decoration: none; color: white;">Unlist</a>
+                                        </button>
+                                    <% } %>
+                                    <button class="btn btn-edit">
+                                        <a href="/admin/editCategory?id=<%= category._id %>" style="text-decoration: none; color: white;">Edit</a>
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+        
+                <div class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>&search=<%= searchQuery %>">
+                                        <%= i %>
+                                    </a>
+                                </li>
                             <% } %>
-                            <button class="btn btn-edit" onclick="editCategory('<%= data._id %>', '<%= data.name %>', '<%= data.description %>')">Edit</button>
-                        </td>
-                    </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-            <div class="pagination-container">
-                <a href="#">&laquo; Previous</a>
-                <span class="current-page"></span>
-                <a href="#"></a>
-                <a href="#">Next &raquo;</a>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-form card">
+            <div class="card-body border border-black">
+                <h2 id="form-title">Add Category</h2>
+                <form id="add-category-form">
+                    <input type="hidden" name="id" id="category-id">
+                    <div class="form-group">
+                        <label for="category-name">Category Name</label>
+                        <input type="text" name="name" id="category-name" class="form-control">
+                        <div id="name-error" class="error-message" style="color: red; display: none;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="category-description">Category Description</label>
+                        <input type="text" id="descriptionId" name="description" class="form-control" rows="4"></input>
+                        <div id="description-error" class="error-message" style="color: red; display: none;"></div>
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="categoryImage">Category Image</label>
+                        <input type="file" class="form-control-file" id="categoryImage" name="categoryImage" required>
+                        <div id="image-error" class="error-message" style="color: red; display: none;"></div>
+                    </div>
+                    <button type="submit" onclick="handleFormSubmit(event)" class="btn btn-save">Save</button>
+                </form>
             </div>
         </div>
     </div>
 
-    <div class="category-form card">
-        <div class="card-body">
-            <h2 id="form-title">Add Category</h2>
-            <form action="/admin/saveCategory" onsubmit="return handleFormSubmit(event)" method="post" id="category-form">
-                <input type="hidden" name="id" id="category-id">
-                <div class="form-group">
-                    <label for="category-name">Category Name</label>
-                    <input type="text" name="name" id="category-name" class="form-control" >
-                    <div id="name-error" class="error-message" style="color: red; display: none;"></div>
-                </div>
-                <div class="form-group">
-                    <label for="category-description">Category Description</label>
-                    <input type="text" id="descriptionId" name="description" class="form-control" rows="4" ></input>
-                    <div id="description-error" class="error-message" style="color: red; display: none;"></div>
-                </div>
-                <button type="submit" class="btn btn-save">Save</button>
-            </form>
-        </div>
-    </div>
-</div>
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault();
 
-<div>
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            <% for(let i=1; i<=totalPages; i++){ %>
-            <li class="page-item <%=(i===currentPage)? 'active' : '' %>">
-                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-            </li>
-            <% } %>
-        </ul>
-    </nav>
-</div>
+            if (!validateForm()) {
+                return;
+            }
 
-<script>
-    function editCategory(id, name, description) {
-        document.getElementById('category-id').value = id;
-        document.getElementById('category-name').value = name;
-        document.getElementById('category-description').value = description;
-        document.getElementById('form-title').innerText = 'Edit Category';
-        document.getElementById('category-form').action = '/admin/updateCategory';
-    }
-</script>
-<script>
-    function handleFormSubmit(event) {
-        event.preventDefault();
-        if(!validateForm()) {
-            return;
-        }
-        const name= document.getElementsByName("name")[0].value;
-        const description = document.getElementById("descriptionId").value.trim();
+            const formData = new FormData();
+            formData.append("name", document.getElementsByName("name")[0].value);
+            formData.append("description", document.getElementById("descriptionId").value.trim());
+            formData.append("categoryImage", document.getElementById("categoryImage").files[0]);
 
-        fetch("/admin/addCategory", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({name,description})
-    })
-    .then(response=>{
-        if(!response.ok){
-            return response.json().then(err=>{
-                throw new Error(err.error);
+            fetch("/admin/addCategory", {
+                method: "POST",
+                body: formData
             })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.error);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    location.reload();
+                })
+                .catch(error => {
+                    if (error.message === "Category already exists") {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Oops!",
+                            text: "Category already exists"
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Oops!",
+                            text: "Something went wrong while adding category"
+                        });
+                    }
+                    console.error(error.message, " from handleFormSubmit");
+                });
         }
-        return response.json();
-    })
-    .then(data=>{
-        location.reload();
-    })
-    .catch(error=>{
-        if(error.message==="Category already exists"){
-            Swal.fire({
-                icon:'error',
-                title:"Oops!",
-                text: "Category already exists"
-            })
-        }else{
-            Swal.fire({
-                icon:'error',
-                title:"Oops!",
-                text: "Something went wrong while adding category"
-            })
+
+
+        function validateForm() {
+            clearErrorMessages();
+            const name = document.getElementsByName("name")[0].value.trim();
+            const description = document.getElementById("descriptionId").value.trim();
+            const imageInput = document.getElementById("categoryImage");
+            const imageFiles = imageInput.files;
+            let isValid = true;
+
+            if (name == "") {
+                displayErrorMessage("name-error", "Please enter a name");
+                isValid = false;
+            }
+            if (description === "") {
+                displayErrorMessage("description-error", "Please enter a description");
+                isValid = false;
+            }
+            if (imageFiles.length === 0) {
+                displayErrorMessage("image-error", "Please upload an image");
+                isValid = false;
+            }
+            return isValid;
         }
-        console.error(error.message, " from handleFormSubmit")
-    })
-}
 
-// function handleFormSubmit(event) {
-//     event.preventDefault();
-//     if(!validateForm()) {
-//         return;
-//     }
-//     const name= document.getElementsByName("name")[0].value;
-//     const description = document.getElementById("descriptionId").value.trim();
+        function displayErrorMessage(elementId, message) {
+            var errorElement = document.getElementById(elementId);
+            errorElement.innerText = message;
+            errorElement.style.display = "block";
+        }
 
-//     fetch("/admin/addCategory", {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json"
-//         },
-//         body: JSON.stringify({name,description})
-//     })
-//     .then(response=>{
-//         if(!response.ok){
-//             return response.json().then(err=>{
-//                 throw new Error(err.error)
-//             })
-//         }
-//         return response.json();
-//     })
-//     .then(data=>{
-//         location.reload();
-//     })
-//     .catch(err=>{
-//         if(error.message==="Category already exists"){
-//             Swal.fire({
-//                 icon:'error',
-//                 title:"Oops!",
-//                 text: "Category already exists"
-//             })
-//         }else{
-//             Swal.fire({
-//                 icon:'error',
-//                 title:"Oops!",
-//                 text: "Something went wrong"
-//             })
-//         }
-//     })
-// }
+        function clearErrorMessages() {
+            const errorElements = document.getElementsByClassName("error-message");
+            Array.from(errorElements).forEach((element) => {
+                element.innerText = "",
+                    element.style.display = "none";
+            });
+        }
+        document.getElementById("search-input").addEventListener("keyup", function () {
+            var filter = this.value.toLowerCase();
+            var rows = document.querySelectorAll("#searchProduct tr");
 
-function validateForm() {
-    clearErrorMessages();
-    const name= document.getElementsByName("name")[0].value.trim();
-    const description = document.getElementById("descriptionId").value.trim();
-    isValid = true;
- 
-    if(name==""){
-        displayErrorMessage("name-error","Please enter a name");
-        isValid = false;
-    }else if(!/^[a-zA-Z\s]+$/.test(name)){
-        displayErrorMessage("name-error","Category name must contain only letters and spaces");
-        isValid = false;
-    }
-    if(description===""){
-        displayErrorMessage("description-error","Please enter a description");
-        isValid = false;
-    }
-    return isValid;
-}
+            rows.forEach(function (row) {
+                var cells = row.getElementsByTagName("td");
+                var match = Array.from(cells).some(function (cell) {
+                    return cell.textContent.toLowerCase().includes(filter);
+                });
+                row.style.display = match ? "" : "none";
+            });
+        });
+    </script>
+    <style>
+        .btn-list,
+        .btn-unlist,
+        .btn-edit,
+        .btn-save {
+            transition: background-color 0.3s ease;
+            color: white;
+            border: none;
+            height: 30px;
+            text-decoration: none;
+        }
 
-function displayErrorMessage(elementId, message){
-    var errorElement = document.getElementById(elementId);
-    errorElement.innerText = message;
-    errorElement.style.display = "block";
-}
+        .btn-list {
+            background-color: #1CC0A0;
+            /* Blue-Green Theme */
+        }
 
-function clearErrorMessages(){
-    const errorElements = document.getElementsByClassName("error-message");
-    Array.from(errorElements).forEach((element)=>{
-        element.innerText="",
-        element.style.display = "none";
-    });
-}
-</script>
+        .btn-unlist {
+            background-color: #ff0000;
+        }
 
-        <%- include("../partials/admin/footer.ejs") %>
+        .btn-edit {
+            background-color: #007bff;
+            /* Blue color */
+        }
+
+        .btn-save {
+            background-color: #26924a;
+            margin-top: 10px;
+        }
+
+        .btn-list:hover,
+        .btn-unlist:hover,
+        .btn-edit:hover,
+        .btn-save:hover {
+            background-color: #ffffff !important;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            height: 30px;
+            padding-right: 50px;
+        }
+
+        .search-container button {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            background-color: #1CC0A0;
+            /* Blue-Green Theme */
+            border: none;
+            color: white;
+            padding: 0 12px;
+            cursor: pointer;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        .categories-list {
+            width: 70%;
+            margin-right: 5%;
+        }
+
+        .category-form {
+            width: 30%;
+        }
+
+        .table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 0 auto;
+            height: 15rem;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid #000000;
+            /* Adds border to each cell */
+            padding: 8px;
+            /* Adds padding to cells */
+            text-align: left;
+            /* Aligns text to the start of the cell */
+        }
+
+        .table thead {
+            background-color: #1CC0A0;
+            color: white;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .table tbody tr:hover {
+            background-color: #d1e7dd;
+        }
+
+        .search-container {
+            width: 50%;
+            margin: 20px auto;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+
+    <%- include("../partials/admin/footer.ejs") %>

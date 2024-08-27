@@ -16,6 +16,8 @@
                 <tr>
                     <th onclick="sortTable(0)">Product Name</th>
                     <th onclick="sortTable(1)">Category</th>
+                    <th>Images</th>
+                    <th onclick="sortTable(5)">Published Year</th>
                     <th onclick="sortTable(2)">Description</th>
                     <th onclick="sortTable(3)">Price</th>
                     <th onclick="sortTable(4)">Author</th>
@@ -27,23 +29,40 @@
                 </tr>
             </thead>
             <tbody id="productTable">
-                <% data.forEach(product =>{ %>
+                <% data.reverse().forEach(product =>{ %>
                 <tr>
                     <td><%= product.productName %></td>
-                    <td><%= product.category %></td>
+                    <td><%= product.category.name %></td>
+                    <td>
+                        <% if (product.productImage && product.productImage.length > 0) { %>
+                            <% product.productImage.forEach((image, index) => { %>
+                                <img src="/productImages/<%= image %>" <%= index + 1 %>" class="img-thumbnail" style="max-width: 50px; max-height: auto;">
+                            <% }) %>
+                        <% } else { %>
+                            <p>No images available.</p>
+                        <% } %>
+                    </td>
+                    <td><%= product.publishedYear %></td>
                     <td><%= product.productDescription %></td>
                     <td><%= product.productPrice %></td>
-                    <td><%= product.author %></td>
+                    <td><%= product.authorname %></td>
                     <td><%= product.offerPrice %></td>
                     <td><%= product.pageCount %></td>
                     <td><%= product.quantity %></td>
                     <td><%= product.status %></td>
-                    <td class="action-buttons">
-                        <% if (product.isBlocked) { %>
-                        <button class="btn btn-success btn-sm">Unlist</button>
+                    <td class="d-flex action-buttons">
+                        <% if (product.isListed) { %>
+                        <button class="btn btn-success btn-sm" >
+                            <a href="/admin/toggleProduct?id=<%= product._id %>" style="text-decoration: none; color: white;">Unlist</a>
+                        </button>
                         <% } else { %>
-                        <button class="btn btn-danger btn-sm">List</button>
+                        <button class="btn btn-danger btn-sm">
+                            <a href="/admin/toggleProduct?id=<%= product._id %>" style="text-decoration: none; color: white;">List</a>
+                        </button>
                         <% } %>
+                        <button class="btn btn-primary btn-sm ms-1">
+                            <a href="/admin/editProduct?id=<%= product._id %>" style="text-decoration: none; color: white;">Edit</a>
+                        </button>
                     </td>
                 </tr>
                 <% }) %>

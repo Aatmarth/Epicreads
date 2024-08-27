@@ -1,84 +1,101 @@
-<%- include("../partials/user/header.ejs") %>  
-        <main class="main">
-            <div class="intro-section pt-lg-2">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-12 col-lg-12">
-                            <div class="banner banner-big banner-overlay position-relative">
-                                <a href="#">
-                                    <img src="assets/images/welcomeImage.png" alt="Banner" class="img-fluid">
-                                </a>
+<%- include("../partials/user/header.ejs") %>
+    <main class="main">
+        <div class="intro-section pt-lg-2">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <div class="banner banner-big banner-overlay position-relative">
+                            <a href="#">
+                                <img src="assets/images/welcomeImage.png" alt="Banner" class="img-fluid">
+                            </a>
 
-                                <div class="banner-content d-flex justify-content-center align-items-end position-absolute w-100"
-                                    style="bottom: 1px;">
-                                    <a href="#" class="btn btn-outline-white-3 banner-link">discover now<i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .banner-content -->
-                            </div><!-- End .banner -->
-                        </div><!-- End .col-lg-6 -->
-                    </div><!-- End .row -->
-                </div><!-- End .container -->
-            </div><!-- End .intro-section -->
-           
+                            <div class="banner-content d-flex justify-content-center align-items-end position-absolute w-100"
+                                style="bottom: 1px;">
+                                <a href="#" class="btn border border-light text-light banner-link">discover now<i
+                                        class="icon-long-arrow-right"></i></a>
+                            </div><!-- End .banner-content -->
+                        </div><!-- End .banner -->
+                    </div><!-- End .col-lg-6 -->
+                </div><!-- End .row -->
+            </div><!-- End .container -->
+        </div><!-- End .intro-section -->
 
-            <div class="bestseller-products bg-light pt-3 pb-5 mb-5">
-                <div class="block mb-3">
-                    <div class="block-wrapper ">
-                        <div class="container">
-                            <div class="heading heading-flex">
-                                <div class="heading-left">
-                                    <h2 class="title">Bestsellers</h2><!-- End .title -->
-                                </div><!-- End .heading-left -->
+        <div class="box">
+            <% for( let i=0; i < categories.length; i++ ) { %>
+                <% if(products[i] && products[i].productImage && products[i].productImage.length > 0) { %>
+                    <span style="--i: <%= i %>">
+                        <img src="/productImages/<%= products[i].productImage[0] %>" alt="Product Image">
+                    </span>
+                <% } else { %>
+                    <span style="--i: <%= i %>">
+                        <img src="/defaultImage.jpg" alt="Default Image"> <!-- Fallback image -->
+                    </span>
+                <% } %>
+            <% }; %>
+        </div>
 
-                                <div class="heading-right">
-                                    <a href="category.html" class="title-link">View more Products <i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .heading-right -->
-                            </div><!-- End .header-flex -->
 
-                            <div class="owl-carousel carousel-equal-height owl-simple" data-toggle="owl"
-                                data-owl-options='{
-                                    "nav": false, 
-                                    "dots": true,
-                                    "margin": 20,
-                                    "loop": false,
-                                    "responsive": {
-                                        "0": {
-                                            "items":2
-                                        },
-                                        "480": {
-                                            "items":2
-                                        },
-                                        "768": {
-                                            "items":3
-                                        },
-                                        "992": {
-                                            "items":4
-                                        },
-                                        "1440": {
-                                            "items":5
-                                        }
-                                    }
-                                }'>
+        <div class="bestseller-products bg-light pt-3 pb-5 mb-5">
+            <div class="block mb-3">
+                <div class="block-wrapper ">
+                    <div class="container">
+                        <div class="heading heading-flex">
+                            <div class="heading-left">
+                                <h2 class="title">Bestsellers</h2><!-- End .title -->
+                            </div><!-- End .heading-left -->
 
-                                <% products.forEach(products => { %>
+                            <div class="heading-right">
+                                <a href="category.html" class="title-link">View more Products <i
+                                        class="icon-long-arrow-right"></i></a>
+                            </div><!-- End .heading-right -->
+                        </div><!-- End .header-flex -->
+
+                        <div class="owl-carousel carousel-equal-height owl-simple" data-toggle="owl" data-owl-options='{
+                            "nav": false, 
+                            "dots": true,
+                            "margin": 20,
+                            "loop": false,
+                            "responsive": {
+                                "0": {
+                                    "items":2
+                                },
+                                "480": {
+                                    "items":2
+                                },
+                                "768": {
+                                    "items":3
+                                },
+                                "992": {
+                                    "items":4
+                                },
+                                "1440": {
+                                    "items":5
+                                }
+                            }
+                        }'>
+                            <% products.forEach(products=> { %>
                                 <div class="product">
                                     <span class="product-label label-sale">Sale</span>
                                     <figure class="product-media">
-                                        <a href="product.html">
-                                            <img src="productImages/<%= products.productImage[0] %>"
-                                                alt="Product image" class="product-image">
+                                        <a href="/productPage?id=<%=products._id%>">
+                                            <img src="productImages/<%= products.productImage[0] %>" alt="Product image"
+                                                class="product-image">
                                         </a>
                                     </figure><!-- End .product-media -->
                                     <div class="product-body">
-                                        <h3 class="product-title"><a href="product.html"><%= products.productName%></a></h3>
+                                        <h3 class="product-title"><a href="/productPage?id=<%=products._id%>">
+                                                <%= products.productName%>
+                                            </a></h3>
                                         <!-- End .product-title -->
                                         <div class="product-cat">
-                                            by <a href="#"><%=products.author%></a>
+                                            <%=products.author%>
                                         </div><!-- End .product-cat -->
                                         <div class="product-price">
-                                            <span class="new-price">₹<%=products.productPrice%></span>
+                                            <span class="new-price">₹<%=products.offerPrice%></span>
                                         </div><!-- End .product-price -->
+                                        <div class="old-price">
+                                            <span class="original-price">₹<%=products.productPrice%></span>
+                                        </div>
 
                                         <div class="product-footer">
                                             <div class="product-action">
@@ -90,31 +107,28 @@
                                     </div><!-- End .product-body -->
                                 </div><!-- End .product -->
                                 <% }) %>
+                        </div><!-- End .owl-carousel -->
+                    </div><!-- End .container -->
+                </div><!-- End .block-wrapper -->
+            </div><!-- End .block -->
+        </div><!-- End .bg-light pt-4 pb-4 -->
+        ̣
+        <div class="bestseller-products bg-light pt-2 pb-5 mb-5">
+            <div class="block mb-4">
+                <div class="block-wrapper ">
+                    <div class="container">
+                        <div class="heading heading-flex">
+                            <div class="heading-left">
+                                <h2 class="title">New Arrivals</h2><!-- End .title -->
+                            </div><!-- End .heading-left -->
 
-                              
-                            </div><!-- End .owl-carousel -->
-                        </div><!-- End .container -->
-                    </div><!-- End .block-wrapper -->
-                </div><!-- End .block -->
-            </div><!-- End .bg-light pt-4 pb-4 -->
+                            <div class="heading-right">
+                                <a href="category.html" class="title-link">View more Products <i
+                                        class="icon-long-arrow-right"></i></a>
+                            </div><!-- End .heading-right -->
+                        </div><!-- End .header-flex -->
 
-            <div class="bestseller-products bg-light pt-2 pb-5 mb-5">
-                <div class="block mb-4">
-                    <div class="block-wrapper ">
-                        <div class="container">
-                            <div class="heading heading-flex">
-                                <div class="heading-left">
-                                    <h2 class="title">New Arrivals</h2><!-- End .title -->
-                                </div><!-- End .heading-left -->
-
-                                <div class="heading-right">
-                                    <a href="category.html" class="title-link">View more Products <i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .heading-right -->
-                            </div><!-- End .header-flex -->
-
-                            <div class="owl-carousel carousel-equal-height owl-simple" data-toggle="owl"
-                                data-owl-options='{
+                        <div class="owl-carousel carousel-equal-height owl-simple" data-toggle="owl" data-owl-options='{
                                     "nav": false, 
                                     "dots": true,
                                     "margin": 20,
@@ -137,466 +151,258 @@
                                         }
                                     }
                                 }'>
-                                <% products.forEach(products => { %>
-                                    <div class="product">
-                                        <span class="product-label label-sale">Sale</span>
-                                        <figure class="product-media">
-                                            <a href="product.html">
-                                                <img src="productImages/<%= products.productImage[0] %>"
-                                                    alt="Product image" class="product-image">
-                                            </a>
-                                        </figure><!-- End .product-media -->
-                                        <div class="product-body">
-                                            <h3 class="product-title"><a href="product.html"><%= products.productName%></a></h3>
-                                            <!-- End .product-title -->
-                                            <div class="product-cat">
-                                                by <a href="#"><%=products.author%></a>
-                                            </div><!-- End .product-cat -->
-                                            <div class="product-price">
-                                                <span class="new-price">₹<%=products.productPrice%></span>
-                                            </div><!-- End .product-price -->
-    
-                                            <div class="product-footer">
-                                                <div class="product-action">
-                                                    <a href="#" class="btn-product btn-cart"><span>add to cart</span></a>
-                                                    <a href="#" class="btn-product btn-wishlist"><span>Add to
-                                                            Wishlist</span></a>
-                                                </div><!-- End .product-action -->
-                                            </div><!-- End .product-footer -->
-                                        </div><!-- End .product-body -->
-                                    </div><!-- End .product -->
-                                    <% }) %>
-                            </div><!-- End .owl-carousel -->
-                        </div><!-- End .container -->
-                    </div><!-- End .block-wrapper -->
-                </div><!-- End .block -->
-            </div><!-- End .bg-light pt-4 pb-4 -->
+                            <% newArrivals.forEach(products=> { %>
+                                <div class="product">
+                                    <span class="product-label label-sale">Sale</span>
+                                    <figure class="product-media">
+                                        <a href="/productPage?id=<%=products._id%>">
+                                            <img src="productImages/<%= products.productImage[0] %>" alt="Product image"
+                                                class="product-image">
+                                        </a>
+                                    </figure><!-- End .product-media -->
+                                    <div class="product-body">
+                                        <h3 class="product-title"><a href="/productPage?id=<%=products._id%>">
+                                                <%= products.productName%>
+                                            </a></h3>
+                                        <!-- End .product-title -->
+                                        <div class="product-cat">
+                                            <%=products.author%>
+                                        </div><!-- End .product-cat -->
+                                        <div class="product-price">
+                                            <span class="new-price">₹<%=products.offerPrice%></span>
+                                        </div><!-- End .product-price -->
+                                        <div class="old-price">
+                                            <span class="original-price">₹<%=products.productPrice%></span>
+                                        </div>
+
+                                        <div class="product-footer">
+                                            <div class="product-action">
+                                                <a href="#" class="btn-product btn-cart"><span>add to cart</span></a>
+                                                <a href="#" class="btn-product btn-wishlist"><span>Add to
+                                                        Wishlist</span></a>
+                                            </div><!-- End .product-action -->
+                                        </div><!-- End .product-footer -->
+                                    </div><!-- End .product-body -->
+                                </div><!-- End .product -->
+                                <% }) %>
+                        </div><!-- End .owl-carousel -->
+                    </div><!-- End .container -->
+                </div><!-- End .block-wrapper -->
+            </div><!-- End .block -->
+        </div><!-- End .bg-light pt-4 pb-4 -->
 
 
 
-            <div class="mb-5"></div><!-- End .mb-3 -->
+        <div class="mb-5"></div><!-- End .mb-3 -->
 
-            <div class="banner-group mb-2">
-                <div class="container">
-                    <div class="row justify-content-center">
+        <div class="banner-group mb-5">
+            <div class="container">
+                <div class="row">
+                    <% for( let i=0; i < categories.length; i++ ) { %>
                         <div class="col-md-6 col-lg-4">
-                            <div class="banner banner-overlay">
+                            <div class="banner banner-overlay" style="width: 425px; height: 212.5px;">
                                 <a href="#">
-                                    <img src="assets/images/demos/demo-20/banners/banner-6.jpg" alt="Banner">
+                                    <img src="/categoryImages/<%= categories[i].categoryImage %>" alt="Banner">
                                 </a>
 
                                 <div class="banner-content">
-                                    <h4 class="banner-subtitle text-white"><a href="#">A Perfect Choice For Your
-                                            Children</a></h4><!-- End .banner-subtitle -->
-                                    <h3 class="banner-title text-white"><a href="#">Children's <br>Bestselling Books</a>
+                                    <h4 class="banner-subtitle text-white"><a class="text-decoration-none" href="#">
+                                            <%= categories[i].description %>
+                                        </a></h4>
+                                    <h3 class="banner-title text-white"><a class="text-decoration-none" href="#">
+                                            <%= categories[i].name %>
+                                        </a>
                                     </h3><!-- End .banner-title -->
-                                    <a href="#" class="btn btn-outline-white-3 banner-link">Discover Now<i
+                                    <a href="#" class="btn border border-light text-light banner-link">Discover Now<i
                                             class="icon-long-arrow-right"></i></a>
                                 </div><!-- End .banner-content -->
                             </div><!-- End .banner -->
                         </div><!-- End .col-lg-4 -->
+                        <% } %>
+                </div><!-- End .row -->
+            </div><!-- End .container -->
+        </div><!-- End .banner-group -->
+    </main><!-- End .main -->
 
-                        <div class="col-md-6 col-lg-4">
-                            <div class="banner banner-overlay">
-                                <a href="#">
-                                    <img src="assets/images/demos/demo-20/banners/banner-7.jpg" alt="Banner">
-                                </a>
-
-                                <div class="banner-content">
-                                    <h4 class="banner-subtitle text-white"><a href="#">Mental Health Awareness Week</a>
-                                    </h4><!-- End .banner-subtitle -->
-                                    <h3 class="banner-title text-white"><a href="#">Self-Help For <br>Your Future.</a>
-                                    </h3><!-- End .banner-title -->
-                                    <a href="#" class="btn btn-outline-white-3 banner-link">Discover Now<i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .banner-content -->
-                            </div><!-- End .banner -->
-                        </div><!-- End .col-lg-4 -->
-
-                        <div class="col-md-6 col-lg-4">
-                            <div class="banner banner-overlay">
-                                <a href="#">
-                                    <img src="assets/images/demos/demo-20/banners/banner-8.jpg" alt="Banner">
-                                </a>
-
-                                <div class="banner-content">
-                                    <h4 class="banner-subtitle text-white"><a href="#">New York Times Bestsellers</a>
-                                    </h4><!-- End .banner-subtitle -->
-                                    <h3 class="banner-title text-white"><a href="#">Bestselling Food <br>and Drink
-                                            Books.</a></h3><!-- End .banner-title -->
-                                    <a href="#" class="btn btn-outline-white-3 banner-link">Discover Now<i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .banner-content -->
-                            </div><!-- End .banner -->
-                        </div><!-- End .col-lg-4 -->
-                    </div><!-- End .row -->
-                </div><!-- End .container -->
-            </div><!-- End .banner-group -->
-
-            <div class="banner-group mb-2">
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-md-6 col-lg-4">
-                            <div class="banner banner-overlay">
-                                <a href="#">
-                                    <img src="assets/images/demos/demo-20/banners/banner-6.jpg" alt="Banner">
-                                </a>
-
-                                <div class="banner-content">
-                                    <h4 class="banner-subtitle text-white"><a href="#">A Perfect Choice For Your
-                                            Children</a></h4><!-- End .banner-subtitle -->
-                                    <h3 class="banner-title text-white"><a href="#">Children's <br>Bestselling Books</a>
-                                    </h3><!-- End .banner-title -->
-                                    <a href="#" class="btn btn-outline-white-3 banner-link">Discover Now<i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .banner-content -->
-                            </div><!-- End .banner -->
-                        </div><!-- End .col-lg-4 -->
-
-                        <div class="col-md-6 col-lg-4">
-                            <div class="banner banner-overlay">
-                                <a href="#">
-                                    <img src="assets/images/demos/demo-20/banners/banner-7.jpg" alt="Banner">
-                                </a>
-
-                                <div class="banner-content">
-                                    <h4 class="banner-subtitle text-white"><a href="#">Mental Health Awareness Week</a>
-                                    </h4><!-- End .banner-subtitle -->
-                                    <h3 class="banner-title text-white"><a href="#">Self-Help For <br>Your Future.</a>
-                                    </h3><!-- End .banner-title -->
-                                    <a href="#" class="btn btn-outline-white-3 banner-link">Discover Now<i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .banner-content -->
-                            </div><!-- End .banner -->
-                        </div><!-- End .col-lg-4 -->
-
-                        <div class="col-md-6 col-lg-4">
-                            <div class="banner banner-overlay">
-                                <a href="#">
-                                    <img src="assets/images/demos/demo-20/banners/banner-8.jpg" alt="Banner">
-                                </a>
-
-                                <div class="banner-content">
-                                    <h4 class="banner-subtitle text-white"><a href="#">New York Times Bestsellers</a>
-                                    </h4><!-- End .banner-subtitle -->
-                                    <h3 class="banner-title text-white"><a href="#">Bestselling Food <br>and Drink
-                                            Books.</a></h3><!-- End .banner-title -->
-                                    <a href="#" class="btn btn-outline-white-3 banner-link">Discover Now<i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .banner-content -->
-                            </div><!-- End .banner -->
-                        </div><!-- End .col-lg-4 -->
-                    </div><!-- End .row -->
-                </div><!-- End .container -->
-            </div><!-- End .banner-group -->
-
-            <div class="banner-group mb-2">
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-md-6 col-lg-4">
-                            <div class="banner banner-overlay">
-                                <a href="#">
-                                    <img src="assets/images/demos/demo-20/banners/banner-6.jpg" alt="Banner">
-                                </a>
-
-                                <div class="banner-content">
-                                    <h4 class="banner-subtitle text-white"><a href="#">A Perfect Choice For Your
-                                            Children</a></h4><!-- End .banner-subtitle -->
-                                    <h3 class="banner-title text-white"><a href="#">Children's <br>Bestselling Books</a>
-                                    </h3><!-- End .banner-title -->
-                                    <a href="#" class="btn btn-outline-white-3 banner-link">Discover Now<i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .banner-content -->
-                            </div><!-- End .banner -->
-                        </div><!-- End .col-lg-4 -->
-
-                        <div class="col-md-6 col-lg-4">
-                            <div class="banner banner-overlay">
-                                <a href="#">
-                                    <img src="assets/images/demos/demo-20/banners/banner-7.jpg" alt="Banner">
-                                </a>
-
-                                <div class="banner-content">
-                                    <h4 class="banner-subtitle text-white"><a href="#">Mental Health Awareness Week</a>
-                                    </h4><!-- End .banner-subtitle -->
-                                    <h3 class="banner-title text-white"><a href="#">Self-Help For <br>Your Future.</a>
-                                    </h3><!-- End .banner-title -->
-                                    <a href="#" class="btn btn-outline-white-3 banner-link">Discover Now<i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .banner-content -->
-                            </div><!-- End .banner -->
-                        </div><!-- End .col-lg-4 -->
-
-                        <div class="col-md-6 col-lg-4">
-                            <div class="banner banner-overlay">
-                                <a href="#">
-                                    <img src="assets/images/demos/demo-20/banners/banner-8.jpg" alt="Banner">
-                                </a>
-
-                                <div class="banner-content">
-                                    <h4 class="banner-subtitle text-white"><a href="#">New York Times Bestsellers</a>
-                                    </h4><!-- End .banner-subtitle -->
-                                    <h3 class="banner-title text-white"><a href="#">Bestselling Food <br>and Drink
-                                            Books.</a></h3><!-- End .banner-title -->
-                                    <a href="#" class="btn btn-outline-white-3 banner-link">Discover Now<i
-                                            class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .banner-content -->
-                            </div><!-- End .banner -->
-                        </div><!-- End .col-lg-4 -->
-                    </div><!-- End .row -->
-                </div><!-- End .container -->
-            </div><!-- End .banner-group -->
-
-            <div class="mb-5"></div><!-- End .mb-5 -->
-        </main><!-- End .main -->
-
-        
     </div><!-- End .page-wrapper -->
     <button id="scroll-top" title="Back to Top"><i class="icon-arrow-up text-success"></i></button>
 
-
-
-
-    <!-- Sign in / Register Modal -->
-    <div class="modal fade" id="signin-modal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true"><i class="icon-close"></i></span>
-                    </button>
-
-                    <div class="form-box">
-                        <div class="form-tab">
-                            <ul class="nav nav-pills nav-fill" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="signin-tab" data-toggle="tab" href="#signin"
-                                        role="tab" aria-controls="signin" aria-selected="true">Sign In</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="register-tab" data-toggle="tab" href="#register" role="tab"
-                                        aria-controls="register" aria-selected="false">Register</a>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="tab-content-5">
-                                <div class="tab-pane fade show active" id="signin" role="tabpanel"
-                                    aria-labelledby="signin-tab">
-                                    <form action="/login" method="post">
-                                        <div class="form-group">
-                                            <label for="singin-email">User email address *</label>
-                                            <input type="text" class="form-control" id="singin-email"
-                                                name="email" required>
-                                        </div><!-- End .form-group -->
-
-                                        <div class="form-group">
-                                            <label for="singin-password">Password *</label>
-                                            <input type="password" class="form-control" id="singin-password"
-                                                name="password" required>
-                                        </div>
-                                        <div class="modal-body text-danger">
-                                            <%= locals.message %>
-                                          </div>
-                                          <!-- End .form-group -->
-
-                                        <div class="form-footer">
-                                            <button type="submit" class="btn btn-outline-primary-2">
-                                                <span>LOG IN</span>
-                                                <i class="icon-long-arrow-right"></i>
-                                            </button>
-
-                                            <a href="#" class="forgot-link">Forgot Your Password?</a>
-                                        </div><!-- End .form-footer -->
-                                    </form>
-                                    <div class="form-choice">
-                                        <p class="text-center">or sign in with</p>
-                                        <div class="row">
-                                            <div class="col-sm-6 mx-auto">
-                                                <a href="#" class="btn btn-login btn-g">
-                                                    <i class="icon-google"></i>
-                                                    Login With Google
-                                                </a>
-                                            </div><!-- End .col-6 -->
-                                        </div><!-- End .row -->
-                                    </div><!-- End .form-choice -->
-                                </div><!-- .End .tab-pane -->
-                                <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
-                                    <form action="/register" method="post" id="register-form">
-
-                                        <div class="form-group">
-                                            <label for="register-username">Username*</label>
-                                            <input type="text" class="form-control" id="register-username"
-                                                name="name" required>
-                                                <div id="error1" class="error-message"></div>
-                                        </div><!-- End .form-group -->
-
-                                        <div class="form-group">
-                                            <label for="register-email">Mobile Number*</label>
-                                            <input type="number" class="form-control" id="register-mobile"
-                                                name="mobile" required>
-                                                <div id="error3" class="error-message"></div>
-                                        </div><!-- End .form-group -->
-
-                                        <div class="form-group">
-                                            <label for="register-email">Email address*</label>
-                                            <input type="email" class="form-control" id="register-email"
-                                                name="email" required>
-                                                <div id="error2" class="error-message"></div>
-                                        </div><!-- End .form-group -->
-
-                                        <div class="form-group">
-                                            <label for="register-password">Password*</label>
-                                            <input type="password" class="form-control" id="register-password"
-                                                name="password" required>
-                                                <div id="error4" class="error-message"></div>
-                                        </div><!-- End .form-group -->
-
-                                        <div class="form-footer">
-                                            <button type="submit" class="btn btn-outline-primary-2">
-                                                <span>SIGN UP</span>
-                                                <i class="icon-long-arrow-right"></i>
-                                            </button>
-                                        </div><!-- End .form-footer -->
-                                    </form>
-                                    <div class="form-choice">
-                                        <p class="text-center">or sign in with</p>
-                                        <div class="row">
-                                            <div class="col-sm-6 mx-auto">
-                                                <a href="/auth/google" class="btn btn-login btn-g">
-                                                    <i class="icon-google"></i>
-                                                    Login With Google
-                                                </a>
-                                            </div><!-- End .col-6 -->
-                                        </div><!-- End .row -->
-                                    </div><!-- End .form-choice -->
-                                </div><!-- .End .tab-pane -->
-                            </div><!-- End .tab-content -->
-                        </div><!-- End .form-tab -->
-                    </div><!-- End .form-box -->
-                </div><!-- End .modal-body -->
-            </div><!-- End .modal-content -->
-        </div><!-- End .modal-dialog -->
-    </div><!-- End .modal -->
-
     <%- include("../partials/user/footer.ejs") %>
 
-    <% if (locals.message && message.length > 0) { %>
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                $('#signin-modal').modal('show');
-            });
-        </script>
-        <% } %>
+        <% if (locals.message && message.length> 0) { %>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    $('#signin-modal').modal('show');
+                });
+            </script>
+            <% } %>
 
-    <script>
-        const nameid= document.getElementById("register-username");
-        const emailid= document.getElementById("register-email");
-        const mobileid= document.getElementById("register-mobile");
-        const passwordid= document.getElementById("register-password");
-        const error1 = document.getElementById("error1");
-        const error2 = document.getElementById("error2");
-        const error3 = document.getElementById("error3");
-        const error4 = document.getElementById("error4");
-        const registerForm = document.getElementById("register-form");
+                <script>
+                    const nameid = document.getElementById("register-username");
+                    const emailid = document.getElementById("register-email");
+                    const mobileid = document.getElementById("register-mobile");
+                    const passwordid = document.getElementById("register-password");
+                    const error1 = document.getElementById("error1");
+                    const error2 = document.getElementById("error2");
+                    const error3 = document.getElementById("error3");
+                    const error4 = document.getElementById("error4");
+                    const registerForm = document.getElementById("register-form");
 
-        function nameCheck (e){
-            const nameVal = nameid.value;
-            const namePattern = /^[A-Za-z/s]+$/;
+                    function nameCheck(e) {
+                        const nameVal = nameid.value;
+                        const namePattern = /^[A-Za-z/s]+$/;
 
-            if(nameVal.trim() ===""){
-                error1.style.display="block";
-                error1.innerHTML= "Enter a valid name"
-            }else if(!namePattern.test(nameVal)){
-                error1.style.display="block";
-                error1.innerHTML= "Name can only contain alphabets and spaces"
-            }else{
-                error1.style.display="none";
-                error1.innerHTML= "";
-            }
-        }
+                        if (nameVal.trim() === "") {
+                            error1.style.display = "block";
+                            error1.innerHTML = "Enter a valid name"
+                        } else if (!namePattern.test(nameVal)) {
+                            error1.style.display = "block";
+                            error1.innerHTML = "Name can only contain alphabets and spaces"
+                        } else {
+                            error1.style.display = "none";
+                            error1.innerHTML = "";
+                        }
+                    }
 
-        function emailCheck (e){
-            const emailVal = emailid.value;
-            const emailPattern = /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/;
+                    function emailCheck(e) {
+                        const emailVal = emailid.value;
+                        const emailPattern = /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/;
 
-            if(!emailPattern.test(emailVal)){
-                error2.style.display="block";
-                error2.innerHTML= "Enter a valid email"
-            }else{
-                error2.style.display="none";
-                error2.innerHTML= "";
-            }
-        }
+                        if (!emailPattern.test(emailVal)) {
+                            error2.style.display = "block";
+                            error2.innerHTML = "Enter a valid email"
+                        } else {
+                            error2.style.display = "none";
+                            error2.innerHTML = "";
+                        }
+                    }
 
-        function mobileCheck (e){
-            const mobileval = mobileid.value;
-            
-            if(mobileval.trim()===""){
-                error3.style.display="block";
-                error3.innerHTML= "Enter a valid phone number"
-            }else if(mobileval.lenghth <10 || mobileval.length >10){
-                error3.style.display="block"
-                error3.innerHTML= "Mobile number should consists of 10 digits"
-            }else{
-                error3.style.display="none";
-                error3.innerHTML= "";
-            }
-        }
+                    function mobileCheck(e) {
+                        const mobileval = mobileid.value;
 
-        function passwordCheck (e){
-            const passwordVal = passwordid.value;
-            const alphabetic = /[a-zA-Z]/;
-            const digit = /\d/;
+                        if (mobileval.trim() === "") {
+                            error3.style.display = "block";
+                            error3.innerHTML = "Enter a valid phone number"
+                        } else if (mobileval.lenghth < 10 || mobileval.length > 10) {
+                            error3.style.display = "block"
+                            error3.innerHTML = "Mobile number should consists of 10 digits"
+                        } else {
+                            error3.style.display = "none";
+                            error3.innerHTML = "";
+                        }
+                    }
 
-            if(passwordVal.length <8){
-                error4.style.display="block";
-                error4.innerHTML="Should contain 8 characters"
-            }else if(!alphabetic.test(passwordVal) || !digit.test(passwordVal)){
-                error4.style.display="block"
-                error4.innerHTML="Password should contain both alphabetics and numericals"
-            }else{
-                error4.style.display="none";
-                error4.innerHTML= "";
-            }
-        }
+                    function passwordCheck(e) {
+                        const passwordVal = passwordid.value;
+                        const alphabetic = /[a-zA-Z]/;
+                        const digit = /\d/;
 
-        document.addEventListener("DOMContentLoaded", ()=>{
-            registerForm.addEventListener("submit", (e)=>{
-                nameCheck();
-                emailCheck();
-                mobileCheck();
-                passwordCheck();
+                        if (passwordVal.length < 8) {
+                            error4.style.display = "block";
+                            error4.innerHTML = "Should contain 8 characters"
+                        } else if (!alphabetic.test(passwordVal) || !digit.test(passwordVal)) {
+                            error4.style.display = "block"
+                            error4.innerHTML = "Password should contain both alphabetics and numericals"
+                        } else {
+                            error4.style.display = "none";
+                            error4.innerHTML = "";
+                        }
+                    }
 
-                if(
-                    !nameid ||
-                    !emailid ||
-                    !mobileid ||
-                    !passwordid ||
-                    !error1 ||
-                    !error2 ||
-                    !error3 ||
-                    !error4 ||
-                    !registerForm
-                ){
-                    console.error("One or more elements not found");
-                }
-                    
-                if(
-                    error1.innerHTML ||
-                    error2.innerHTML ||
-                    error3.innerHTML ||
-                    error4.innerHTML 
-                ){
-                    e.preventDefault();
-                }
+                    document.addEventListener("DOMContentLoaded", () => {
+                        registerForm.addEventListener("submit", (e) => {
+                            nameCheck();
+                            emailCheck();
+                            mobileCheck();
+                            passwordCheck();
 
-            })
-        })
-        
-    </script>
-    <style>
-        .error-message{
-            color:red;
-            font-size: 1rem;
-            display: none;
-        }
-    </style>
+                            if (
+                                !nameid ||
+                                !emailid ||
+                                !mobileid ||
+                                !passwordid ||
+                                !error1 ||
+                                !error2 ||
+                                !error3 ||
+                                !error4 ||
+                                !registerForm
+                            ) {
+                                console.error("One or more elements not found");
+                            }
+
+                            if (
+                                error1.innerHTML ||
+                                error2.innerHTML ||
+                                error3.innerHTML ||
+                                error4.innerHTML
+                            ) {
+                                e.preventDefault();
+                            }
+
+                        })
+                    })
+
+                </script>
+                <style>
+                    .error-message {
+                        color: red;
+                        font-size: 1rem;
+                        display: none;
+                    }
+
+
+                    .box:hover {
+                        animation-play-state: paused;
+                    }
+
+                    .box {
+                        background-color: darkgray;
+                        top: 70px;
+                        left: 43%;
+                        margin-bottom: 150px;
+                        background-color: black;
+                        position: relative;
+                        width: 200px;
+                        height: 300px;
+                        transform-style: preserve-3d;
+                        transform: perspective(1000px);
+                        animation: animate 30s linear infinite;
+                    }
+
+                    @keyframes animate {
+                        0% {
+                            transform: perspective(1000px) rotateY(0deg);
+                        }
+
+                        100% {
+                            transform: perspective(1000px) rotateY(360deg);
+                        }
+                    }
+
+                    .box span {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: #fff;
+                        transform: rotateY(calc(var(--i) * 45deg)) translateZ(240px);
+                    }
+
+                    .box span::before {
+                        content: "";
+                        position: absolute;
+                        inset: 0;
+                        z-index: 2;
+                        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+                    }
+
+                    .box span img {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                </style>

@@ -33,7 +33,7 @@
 
         .search-container button {
             position: absolute;
-            right: -7px;
+            right: 0px;
             top: 0;
             height: 100%;
             background-color: #1CC0A0;
@@ -101,7 +101,8 @@
             display: block;
             padding: 0.5em 1em;
             text-decoration: none;
-            color: #007bff; /* Blue color */
+            color: #007bff;
+            /* Blue color */
             background-color: #ffffff;
             border: 1px solid #007bff;
             border-radius: 0.25em;
@@ -127,6 +128,7 @@
         }
     </style>
     </head>
+
     <body>
         <div class="container">
             <h2 class="display-6">USERS</h2>
@@ -151,21 +153,29 @@
                                 <th class="text-center" style="width: 150px;">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <% for(let i = 0; i < data.length; i++){ %>
-                            <tr>
-                                <td><%= data[i].name %></td>
-                                <td><%= data[i].email %></td>
-                                <td><%= data[i].mobile %></td>
-                                <td class="text-center">
-                                    <% if(data[i].isBlocked == 0){ %>
-                                    <a href="/admin/blockCustomer?id=<%= data[i]._id %>" class="btn btn-danger btn-sm">Block</a>
-                                    <% } else { %>
-                                    <a href="/admin/unblockCustomer?id=<%= data[i]._id %>" class="btn btn-success btn-sm">Unblock</a>
-                                    <% } %>
-                                </td>
-                            </tr> 
-                            <% } %>
+                        <tbody id="searchProduct">
+                            <% for(let i=0; i < data.length; i++){ %>
+                                <tr>
+                                    <td>
+                                        <%= data[i].name %>
+                                    </td>
+                                    <td>
+                                        <%= data[i].email %>
+                                    </td>
+                                    <td>
+                                        <%= data[i].mobile %>
+                                    </td>
+                                    <td class="text-center">
+                                        <% if(data[i].isBlocked==0){ %>
+                                            <a href="/admin/blockCustomer?id=<%= data[i]._id %>"
+                                                class="btn btn-danger btn-sm">Block</a>
+                                            <% } else { %>
+                                                <a href="/admin/unblockCustomer?id=<%= data[i]._id %>"
+                                                    class="btn btn-success btn-sm">Unblock</a>
+                                                <% } %>
+                                    </td>
+                                </tr>
+                                <% } %>
                         </tbody>
                     </table>
                 </div>
@@ -179,9 +189,11 @@
                 <ul style="display: flex; justify-content: center;" class="pagination">
                     <% for(let i=1; i<=totalPages;i++){ %>
                         <li class="page-item <%=(i===currentPage)? 'active' : '' %>">
-                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                            <a class="page-link" href="?page=<%= i %>">
+                                <%= i %>
+                            </a>
                         </li>
-                    <% } %>
+                        <% } %>
                 </ul>
             </nav>
         </div>
@@ -194,5 +206,17 @@
                     button.classList.remove('animate__animated', 'animate__pulse');
                 });
             }
+            document.getElementById("search-input").addEventListener("keyup", function () {
+                var filter = this.value.toLowerCase();
+                var rows = document.querySelectorAll("#searchProduct tr");
+
+                rows.forEach(function (row) {
+                    var cells = row.getElementsByTagName("td");
+                    var match = Array.from(cells).some(function (cell) {
+                        return cell.textContent.toLowerCase().includes(filter);
+                    });
+                    row.style.display = match ? "" : "none";
+                });
+            });
         </script>
         <%- include("../partials/admin/footer.ejs") %>

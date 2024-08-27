@@ -1,0 +1,182 @@
+<%- include("../partials/user/loginHeader.ejs") %>
+
+<div class="container mt-5">
+    <div id="signin-modal" class="form-box">
+        <div class="form-tab">
+            <ul class="nav nav-pills nav-fill" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="signin-tab" data-toggle="tab" href="#signin" role="tab"
+                        aria-controls="signin" aria-selected="true">Sign In</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"  href="/register"  aria-selected="false">Register</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="tab-content-5">
+                <div class="tab-pane fade show active" id="signin" role="tabpanel" aria-labelledby="signin-tab">
+                    <p class="text-center text-danger"><%if(typeof message != 'undefined'){%>
+                        <%=message%>
+                   <% } %></p>
+                    <form action="/login" method="post">
+                        <div class="form-group">
+                            <label for="singin-email">User email address *</label>
+                            <input type="text" class="form-control" id="singin-email" name="email" required>
+                        </div><!-- End .form-group -->
+
+                        <div class="form-group">
+                            <label for="singin-password">Password *</label>
+                            <input type="password" class="form-control" id="singin-password" name="password" required>
+                        </div>
+                        <div class="text-danger">
+                            <%= locals.message %>
+                        </div><!-- End .form-group -->
+
+                        <div class="form-footer">
+                            <button type="submit" class="btn btn-outline-primary-2">
+                                <span>LOG IN</span>
+                                <i class="icon-long-arrow-right"></i>
+                            </button>
+
+                            <a href="#" class="forgot-link">Forgot Your Password?</a>
+                        </div><!-- End .form-footer -->
+                    </form>
+                    <div class="form-choice">
+                        <p class="text-center">or sign in with</p>
+                        <div class="row">
+                            <div class="col-sm-6 mx-auto">
+                                <a href="/auth/google" class="btn btn-login btn-g">
+                                    <i class="icon-google"></i>
+                                    Login With Google
+                                </a>
+                            </div><!-- End .col-6 -->
+                        </div><!-- End .row -->
+                    </div><!-- End .form-choice -->
+                </div><!-- .End .tab-pane -->
+                
+            </div><!-- End .tab-content -->
+        </div><!-- End .form-tab -->
+    </div><!-- End .form-box -->
+</div><!-- End .container -->
+
+
+
+<script>
+    const nameid = document.getElementById("register-username");
+    const emailid = document.getElementById("register-email");
+    const mobileid = document.getElementById("register-mobile");
+    const passwordid = document.getElementById("register-password");
+    const error1 = document.getElementById("error1");
+    const error2 = document.getElementById("error2");
+    const error3 = document.getElementById("error3");
+    const error4 = document.getElementById("error4");
+    const registerForm = document.getElementById("register-form");
+
+    function nameCheck(e) {
+        const nameVal = nameid.value;
+        const namePattern = /^[A-Za-z/s]+$/;
+
+        if (nameVal.trim() === "") {
+            error1.style.display = "block";
+            error1.innerHTML = "Enter a valid name"
+        } else if (!namePattern.test(nameVal)) {
+            error1.style.display = "block";
+            error1.innerHTML = "Name can only contain alphabets and spaces"
+        } else {
+            error1.style.display = "none";
+            error1.innerHTML = "";
+        }
+    }
+
+    function emailCheck(e) {
+        const emailVal = emailid.value;
+        const emailPattern = /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/;
+
+        if (!emailPattern.test(emailVal)) {
+            error2.style.display = "block";
+            error2.innerHTML = "Enter a valid email"
+        } else {
+            error2.style.display = "none";
+            error2.innerHTML = "";
+        }
+    }
+
+    function mobileCheck(e) {
+        const mobileval = mobileid.value;
+
+        if (mobileval.trim() === "") {
+            error3.style.display = "block";
+            error3.innerHTML = "Enter a valid phone number"
+        } else if (mobileval.lenghth < 10 || mobileval.length > 10) {
+            error3.style.display = "block"
+            error3.innerHTML = "Mobile number should consists of 10 digits"
+        } else {
+            error3.style.display = "none";
+            error3.innerHTML = "";
+        }
+    }
+
+    function passwordCheck(e) {
+        const passwordVal = passwordid.value;
+        const alphabetic = /[a-zA-Z]/;
+        const digit = /\d/;
+
+        if (passwordVal.length < 8) {
+            error4.style.display = "block";
+            error4.innerHTML = "Should contain 8 characters"
+        } else if (!alphabetic.test(passwordVal) || !digit.test(passwordVal)) {
+            error4.style.display = "block"
+            error4.innerHTML = "Password should contain both alphabetics and numericals"
+        } else {
+            error4.style.display = "none";
+            error4.innerHTML = "";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        registerForm.addEventListener("submit", (e) => {
+            nameCheck();
+            emailCheck();
+            mobileCheck();
+            passwordCheck();
+
+            if (
+                !nameid ||
+                !emailid ||
+                !mobileid ||
+                !passwordid ||
+                !error1 ||
+                !error2 ||
+                !error3 ||
+                !error4 ||
+                !registerForm
+            ) {
+                console.error("One or more elements not found");
+            }
+
+            if (
+                error1.innerHTML ||
+                error2.innerHTML ||
+                error3.innerHTML ||
+                error4.innerHTML
+            ) {
+                e.preventDefault();
+            }
+
+        })
+    })
+
+</script>
+<!-- Plugins JS File -->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/jquery.hoverIntent.min.js"></script>
+<script src="assets/js/jquery.waypoints.min.js"></script>
+<script src="assets/js/superfish.min.js"></script>
+<script src="assets/js/owl.carousel.min.js"></script>
+<script src="assets/js/jquery.magnific-popup.min.js"></script>
+<!-- Main JS File -->
+<script src="assets/js/main.js"></script>
+<script src="assets/js/demos/demo-20.js"></script>
+</body>
+
+</html>
