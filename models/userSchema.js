@@ -48,6 +48,10 @@ const userSchema = new Schema({
     orders: [{
         type: Schema.Types.ObjectId,
         ref: "Order"
+    }],
+    addresses: [{
+        type: Schema.Types.ObjectId,
+        ref: "Address"
     }]
 },{
     timestamps: true

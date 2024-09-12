@@ -134,8 +134,7 @@
             <h2 class="display-6">USERS</h2>
             <form action="/admin/users" method="get">
                 <div class="search-container d-flex w-50">
-                    <input type="text" class="form-control" id="search-input"
-                        placeholder="Search for user by name or email">
+                    <input type="text" class="form-control" id="search-input" name="search" value="<%= search %>" placeholder="Search for user by name or email">
                     <button id="search-button">Search</button>
                 </div>
             </form>
@@ -154,46 +153,34 @@
                             </tr>
                         </thead>
                         <tbody id="searchProduct">
-                            <% for(let i=0; i < data.length; i++){ %>
+                            <% for(let i = 0; i < data.length; i++) { %>
                                 <tr>
-                                    <td>
-                                        <%= data[i].name %>
-                                    </td>
-                                    <td>
-                                        <%= data[i].email %>
-                                    </td>
-                                    <td>
-                                        <%= data[i].mobile %>
-                                    </td>
+                                    <td><%= data[i].name %></td>
+                                    <td><%= data[i].email %></td>
+                                    <td><%= data[i].mobile %></td>
                                     <td class="text-center">
-                                        <% if(data[i].isBlocked==0){ %>
-                                            <a href="/admin/blockCustomer?id=<%= data[i]._id %>"
-                                                class="btn btn-danger btn-sm">Block</a>
-                                            <% } else { %>
-                                                <a href="/admin/unblockCustomer?id=<%= data[i]._id %>"
-                                                    class="btn btn-success btn-sm">Unblock</a>
-                                                <% } %>
+                                        <% if(data[i].isBlocked == 0) { %>
+                                            <a href="/admin/blockCustomer?id=<%= data[i]._id %>" class="btn btn-danger btn-sm">Block</a>
+                                        <% } else { %>
+                                            <a href="/admin/unblockCustomer?id=<%= data[i]._id %>" class="btn btn-success btn-sm">Unblock</a>
+                                        <% } %>
                                     </td>
                                 </tr>
-                                <% } %>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>
-                <div class="card-footer text-center">
-                    <button class="btn btn-primary">Add New User</button>
-                </div>
             </div>
         </div>
+    
         <div>
             <nav aria-label="Page navigation">
-                <ul style="display: flex; justify-content: center;" class="pagination">
-                    <% for(let i=1; i<=totalPages;i++){ %>
-                        <li class="page-item <%=(i===currentPage)? 'active' : '' %>">
-                            <a class="page-link" href="?page=<%= i %>">
-                                <%= i %>
-                            </a>
+                <ul class="pagination">
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                            <a class="page-link" href="/admin/users?page=<%= i %>&search=<%= search %>"><%= i %></a>
                         </li>
-                        <% } %>
+                    <% } %>
                 </ul>
             </nav>
         </div>

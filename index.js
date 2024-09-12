@@ -9,6 +9,8 @@ const db=require("./config/db");
 const userRouter=require("./routes/userRouter");
 const adminRouter=require("./routes/adminRouter");
 const Category = require("./models/categorySchema");
+const nocache = require('nocache');
+
 
 
 db();
@@ -36,13 +38,15 @@ app.use((req,res,next)=>{
 })
 app.use(async (req, res, next) => {
   try {
-      const category = await Category.find({}); 
+      const category = await Category.find({}).sort({name:1})
       res.locals.category = category;
       next();
   } catch (error) {
       next(error);
   }
 });
+
+app.use(nocache());
 
 app.set("view engine","ejs");
 app.set("views",[path.join(__dirname,"views/admin"),path.join(__dirname,"views/user")]);

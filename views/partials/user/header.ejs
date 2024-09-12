@@ -22,6 +22,8 @@
     <meta name="msapplication-config" content="assets/images/icons/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
     <link rel="stylesheet" href="assets/vendor/line-awesome/line-awesome/line-awesome/css/line-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <!-- Plugins CSS File -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/plugins/owl-carousel/owl.carousel.css">
@@ -66,13 +68,16 @@
                     <div class="header-right">
                         <div class="header-search header-search-extended header-search-visible header-search-no-radius">
                             <a href="#" class="search-toggle" role="button"><i class="icon-search"></i></a>
-                            <form action="#" method="get">
+                            <form action="/search" method="get" id="searchForm">
                                 <div class="header-search-wrapper search-wrapper-wide">
                                     <label for="q" class="sr-only">Search</label>
-                                    <input type="search" class="form-control" name="q" id="q"
-                                        placeholder="Search product ..." required>
-
+                                    <input type="search" class="form-control" name="q" id="q" placeholder="Search product ..."
+                                        required onkeyup="fetchSuggestions(this.value)">
+                        
                                     <button class="btn search-button" type="submit"><i class="icon-search"></i></button>
+                        
+                                    <!-- Suggestions Dropdown -->
+                                    <div id="suggestions" class="suggestions-dropdown"></div>
                                 </div><!-- End .header-search-wrapper -->
                             </form>
                         </div><!-- End .header-search -->
@@ -80,7 +85,7 @@
                         <div class="header-dropdown-link">
                             <div class="account">
                                 <% if (locals.user) { %>
-                                <a href="/userAccount" title="My account">
+                                <a href="/userProfile" title="My account">
                                     <div class="icon">
                                         <i class="icon-user"></i>
                                     </div>
@@ -100,8 +105,7 @@
                             </div><!-- End .compare-dropdown -->
 
                             <div class="dropdown cart-dropdown">
-                                <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false" data-display="static">
+                                <a href="/cart" class="dropdown-toggle">
                                     <div class="icon">
                                         <i class="icon-shopping-cart"></i>
                                         <span class="cart-count">2</span>
@@ -180,6 +184,62 @@
         background-color: #17a589;
         }
         </style>
+    <style>
+        .suggestions-dropdown {
+            position: absolute;
+            background: white;
+            width: 100%;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .suggestions-dropdown a {
+            display: block;
+            padding: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            color: black;
+        }
+        
+        .suggestions-dropdown a:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+    <script>
+        document.getElementById('q').addEventListener('input', function() {
+            const query = this.value;
+            if (query.length > 2) {
+                fetch(`/search-suggestions?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const suggestionsBox = document.getElementById('suggestions');
+                        suggestionsBox.innerHTML = '';
+                        if (data.length > 0) {
+                            data.forEach(product => {
+                                const suggestionItem = document.createElement('a');
+                                suggestionItem.href = `/productPage?id=${product._id}`;
+                                suggestionItem.textContent = product.name;
+                                suggestionsBox.appendChild(suggestionItem);
+                            });
+                            suggestionsBox.style.display = 'block';
+                        } else {
+                            suggestionsBox.style.display = 'none';
+                        }
+                    });
+            } else {
+                document.getElementById('suggestions').style.display = 'none';
+            }
+        });
+    
+        // Hide suggestions dropdown when clicked outside
+        document.addEventListener('click', function(event) {
+            const suggestionsBox = document.getElementById('suggestions');
+            if (!event.target.closest('.header-search-wrapper')) {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+    </script>
 
 
         

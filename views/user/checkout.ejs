@@ -1,0 +1,282 @@
+<%- include("../partials/user/header.ejs") %>
+
+
+	<main class="main">
+		<div class="page-header text-center" style="background-image: url('assets/images/page-header-bg.jpg')">
+			<div class="container">
+				<h1 class="page-title">Checkout</h1>
+			</div><!-- End .container -->
+
+
+		</div><!-- End .page-header -->
+		<nav aria-label="breadcrumb" class="breadcrumb-nav">
+			<div class="container">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href="/">Home</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Checkout</li>
+				</ol>
+			</div><!-- End .container -->
+		</nav><!-- End .breadcrumb-nav -->
+
+		<div class="page-content">
+			<div class="checkout">
+				<div class="container">
+					<div class="checkout-discount">
+						<form action="#">
+							<input type="text" class="form-control" required id="checkout-discount-input">
+							<label for="checkout-discount-input" class="text-truncate">Have a coupon? <span>Click here
+									to enter your code</span></label>
+						</form>
+					</div><!-- End .checkout-discount -->
+					<h1 class="text-center">Billing Details</h1>
+					<form action="/placeOrder" method="POST">
+						<div class="row">
+
+							<div class="col-lg-6">
+								<div class="row">
+									<div class="summary">
+										<h5 class="card-title m-3 text-center">Addresses</h5>
+
+										<% address.forEach((address, index)=> { %>
+											<div class="form-group">
+												<label class="form-check-label" for="address-<%= address._id %>">
+													<div class="card" style="border: 1px solid #ccc; padding: 10px;">
+														<input type="radio" class="form-check-input ms-1"
+															id="address-<%= address._id %>" name="address"
+															value="<%= address._id %>" <%=index===0 ? 'checked' : '' %>>
+
+														<h4 class="ms-5" style="font-size: 18px; font-weight: bold;">
+															<%= address.addressType %>
+														</h4>
+														<div class="col-lg-12">
+															<p style="font-size: 14px; color: black;">Name: <%=
+																	address.name %>
+															</p>
+															<p style="font-size: 14px; color: black;">City: <%=
+																	address.city %>
+															</p>
+															<p style="font-size: 14px; color: black;">State: <%=
+																	address.state %>
+															</p>
+															<p style="font-size: 14px; color: black;">Pincode: <%=
+																	address.pincode %>
+															</p>
+															<p style="font-size: 14px; color: black;">Phone: <%=
+																	address.phone %>
+															</p>
+															<% if (address.email) { %>
+																<p style="font-size: 14px; color: black;">Additional
+																	Email: <%= address.email %>
+																</p>
+																<% } %>
+														</div>
+													</div>
+												</label>
+											</div>
+											<% }) %>
+												<a href="/addAddress" class="btn btn-success ms-3">Add New Address</a>
+									</div>
+								</div>
+							</div>
+
+
+							<aside class="col-lg-6">
+								<div class="summary">
+									<h3 class="summary-title text-center">Your Order</h3><!-- End .summary-title -->
+
+									<table class="table table-summary">
+										<thead>
+											<tr>
+												<th>Product</th>
+												<th>Quantity</th>
+												<th>Price</th>
+											</tr>
+										</thead>
+										<tbody>
+											<% if (cartItems.length===0) { %>
+												<tr>
+													<td colspan="3" class="text-center">Your cart is empty.</td>
+												</tr>
+												<% } else { %>
+													<% cartItems.forEach(item=> { %>
+														<tr>
+															<td>
+																<div style="display: flex; align-items: center;">
+																	<img src="/productImages/<%= item.productId.productImage[0] %>"
+																		alt="<%= item.productId.productName %>"
+																		style="width: 50px; height: auto;">
+																	<div style="margin-left: 10px;">
+																		<a
+																			href="productPage?id=<%= item.productId._id %>">
+																			<%= item.productId.productName %>
+																		</a>
+																	</div>
+																</div>
+															</td>
+															<td style="text-align: center;">
+																<%= item.quantity %>
+															</td>
+															<td style="text-align: center;">₹<%=
+																	item.totalPrice.toFixed(2) %>
+															</td>
+														</tr>
+														<% }) %>
+															<tr>
+																<td colspan="2" class="text-right">Subtotal:</td>
+																<td style="text-align: center;">₹<%= subtotal.toFixed(2)
+																		%>
+																</td>
+															</tr>
+															<tr>
+																<td colspan="2" class="text-right">Shipping Fee:</td>
+																<td style="text-align: center;">
+																	<%= shippingCharge> 0 ? '₹' +
+																		shippingCharge.toFixed(2) : 'Free Shipping' %>
+																</td>
+															</tr>
+															<tr class="summary-total">
+																<td colspan="2" class="text-right">Total:</td>
+																<td style="text-align: center;">₹<%= total.toFixed(2) %>
+																</td>
+															</tr>
+															<% } %>
+										</tbody>
+									</table>
+
+
+									<div class="accordion-summary" id="accordion-payment">
+										<div class="card">
+											<div class="card-header" id="heading-2">
+												<h2 class="card-title">
+													<a class="collapsed" role="button" data-toggle="collapse"
+														href="#collapse-2" aria-expanded="false"
+														aria-controls="collapse-2">
+														Wallet
+													</a>
+												</h2>
+											</div><!-- End .card-header -->
+											<div id="collapse-2" class="collapse" aria-labelledby="heading-2"
+												data-parent="#accordion-payment">
+												<div class="card-body">
+													Ipsum dolor sit amet, consectetuer adipiscing elit. Donec odio.
+													Quisque volutpat mattis eros. Nullam malesuada erat ut turpis.
+												</div><!-- End .card-body -->
+											</div><!-- End .collapse -->
+										</div><!-- End .card -->
+
+										<div class="card">
+											<div class="card-header" id="heading-3">
+												<h2 class="card-title">
+													<a class="collapsed" role="button" data-toggle="collapse"
+														href="#collapse-3" aria-expanded="false"
+														aria-controls="collapse-3">
+														Cash on delivery
+													</a>
+												</h2>
+											</div><!-- End .card-header -->
+											<div id="collapse-3" class="collapse" aria-labelledby="heading-3"
+												data-parent="#accordion-payment">
+												<div class="card-body">Quisque volutpat mattis eros. Lorem ipsum dolor
+													sit amet, consectetuer adipiscing elit. Donec odio. Quisque volutpat
+													mattis eros.
+												</div><!-- End .card-body -->
+											</div><!-- End .collapse -->
+										</div><!-- End .card -->
+
+										<div class="card">
+											<div class="card-header" id="heading-4">
+												<h2 class="card-title">
+													<a class="collapsed" role="button" data-toggle="collapse"
+														href="#collapse-4" aria-expanded="false"
+														aria-controls="collapse-4">
+														Razorpay
+													</a>
+												</h2>
+											</div><!-- End .card-header -->
+											<div id="collapse-4" class="collapse" aria-labelledby="heading-4"
+												data-parent="#accordion-payment">
+												<div class="card-body">
+													Nullam malesuada erat ut turpis. Suspendisse urna nibh, viverra non,
+													semper suscipit, posuere a, pede. Donec nec justo eget felis
+													facilisis fermentum.
+												</div><!-- End .card-body -->
+											</div><!-- End .collapse -->
+										</div><!-- End .card -->
+
+										<div class="card">
+											<div class="card-header" id="heading-5">
+												<h2 class="card-title">
+													<a class="collapsed" role="button" data-toggle="collapse"
+														href="#collapse-5" aria-expanded="false"
+														aria-controls="collapse-5">
+														Credit Card (Stripe)
+														<img src="assets/images/payments-summary.png"
+															alt="payments cards">
+													</a>
+												</h2>
+											</div><!-- End .card-header -->
+											<div id="collapse-5" class="collapse" aria-labelledby="heading-5"
+												data-parent="#accordion-payment">
+												<div class="card-body"> Donec nec justo eget felis facilisis
+													fermentum.Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+													Donec odio. Quisque volutpat mattis eros. Lorem ipsum dolor sit ame.
+												</div><!-- End .card-body -->
+											</div><!-- End .collapse -->
+										</div><!-- End .card -->
+									</div><!-- End .accordion -->
+
+									<button onclick="placeOrder()" class="btn btn-outline-success btn-order btn-block">
+										<span class="btn-text">Place Order</span>
+										<span class="btn-hover-text">Proceed to Checkout</span>
+									</button>
+								</div><!-- End .summary -->
+							</aside><!-- End .col-lg-3 -->
+						</div><!-- End .row -->
+					</form>
+				</div><!-- End .container -->
+			</div><!-- End .checkout -->
+		</div><!-- End .page-content -->
+	</main><!-- End .main -->
+	</div><!-- End .page-wrapper -->
+	<button id="scroll-top" title="Back to Top"><i class="icon-arrow-up"></i></button>
+
+	<%- include("../partials/user/footer.ejs") %>
+
+		<!-- Plugins JS File -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/bootstrap.bundle.min.js"></script>
+		<script src="assets/js/jquery.hoverIntent.min.js"></script>
+		<script src="assets/js/jquery.waypoints.min.js"></script>
+		<script src="assets/js/superfish.min.js"></script>
+		<script src="assets/js/owl.carousel.min.js"></script>
+		<!-- Main JS File -->
+		<script src="assets/js/main.js"></script>
+
+		<style>
+			.table-summary td,
+			.table-summary th {
+				font-size: 15px;
+				/* Adjust the font size as needed */
+			}
+		</style>
+		<script>
+			function placeOrder(){
+				
+				axios.post('/placeOrder', {
+					addressId: document.querySelector('input[name="address"]:checked').value,
+					cartItems: JSON.stringify(<%= JSON.stringify(cartItems) %>)
+				})
+				.then(response => {
+					console.log(response.data);
+					if (response.data.success) {
+						window.location.href = '/orderSuccess';
+					} else {
+						alert(response.data.message);
+					}
+				})
+				.catch(error => {
+					console.error(error);
+					alert('An error occurred while placing your order.');
+				});
+			}
+		</script>

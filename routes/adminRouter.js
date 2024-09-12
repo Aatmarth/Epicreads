@@ -13,7 +13,7 @@ const {userAuth,adminAuth} = require("../middlewares/auth");
 adminRouter.get("/login",adminController.loadLogin);
 adminRouter.post("/login",adminController.login);
 adminRouter.get("/",adminAuth,adminController.loadDashboard);
-adminRouter.get("/logout",adminController.logout);
+adminRouter.get("/logout",adminAuth,adminController.logout);
 
 adminRouter.get("/users",adminAuth, customerController.customerInfo);
 adminRouter.get("/blockCustomer",adminAuth,customerController.blockCustomer);

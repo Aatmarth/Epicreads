@@ -104,15 +104,13 @@
                         <div class="header-dropdown-link">
                             <div class="account">
                                 <% if (locals.user) { %>
-                                    <a href="/userAccount" title="My account">
-                                        <div class="icon">
-                                            <i class="icon-user"></i>
-                                        </div>
-                                        <p>
-                                            <%= locals.user.name %>
-                                        </p>
-                                    </a>
-                                    <% } %>
+                                <a href="/userAccount" title="My account">
+                                    <div class="icon">
+                                        <i class="icon-user"></i>
+                                    </div>
+                                    <p><%= locals.user.name %></p>
+                                </a>
+                                <% } %>
                             </div><!-- End .compare-dropdown -->
 
                             <div class="wishlist">
@@ -126,8 +124,7 @@
                             </div><!-- End .compare-dropdown -->
 
                             <div class="dropdown cart-dropdown">
-                                <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false" data-display="static">
+                                <a href="/cart" class="dropdown-toggle">
                                     <div class="icon">
                                         <i class="icon-shopping-cart"></i>
                                         <span class="cart-count">2</span>
@@ -286,9 +283,15 @@
                                         <div>
                                             <label>Number of Pages:<%= product.pageCount %></label>
                                         </div><!-- End .details-filter-row -->
-                                        <div>
-                                            <a href="#" class="btn-product btn-cart mb-1"><span>add to cart</span></a>
-                                        </div><!-- End .details-action-col -->
+                                        <% if (product.status === 'Available') { %>
+                                            <div>
+                                              <a href="#" class="btn-product btn-cart mb-1" onclick="addToCart('<%= product._id %>')">
+                                                <span>add to cart</span>
+                                              </a>
+                                            </div>
+                                          <% } else { %>
+                                            <p class="text-danger">Product is <%= product.status %></p> 
+                                          <% } %>
 
                                         <div class="btn-product wishlist mb-4">
                                             <a href="#" class="btn-product btn-cart  btn-wishlist"><span>add to

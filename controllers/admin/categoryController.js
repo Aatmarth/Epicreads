@@ -10,7 +10,6 @@ const categoryInfo = async (req, res) => {
         const skip = (page - 1) * limit;
         const searchQuery = req.query.search || '';
 
-
         const query = searchQuery
             ? { name: { $regex: searchQuery, $options: 'i' } }
             : {};
@@ -82,36 +81,52 @@ const loadEditCategory = async(req,res)=>{
     try {
         let id = req.query.id;
         const category = await Category.findOne({_id: id});
-        res.render("editCategory",{category:category})
+        res.render("editCategory", { category: category });
     } catch (error) {
-        console.log(error.message,"Error in editCategory");
+        console.log(error.message, "Error in editCategory");
         res.status(500).send("Internal server error");
     }
 }
 
-const editCategory = async(req,res)=>{
-    console.log(req.body.name);
-    
+const editCategory = async(req, res)=>{
     try {
         let id = req.params.id;
-        
-        const categoryData = {
-            name: req.body.name,
-            description:req.body.description,
-            categoryImage: req.file ? req.file.filename : null
-        }
-        console.log(categoryData);
-        
-        const isExisting = await Category.findOne({name: categoryData.name});
-        if(isExisting){
-            return res.status(400).json({error:"Category already exists"});
-        }
-        await Category.updateOne({_id:id},{$set:categoryData});
-        
-        res.status(200).json({message:"Category updated successfully"});
 
+        // Convert the category name to lowercase for case-insensitive check
+        const newName = req.body.name.trim().toLowerCase();
+
+        const categoryData = {
+            name: req.body.name.trim(),
+            description: req.body.description.trim(),
+        }
+
+        if (req.file) {
+            categoryData.categoryImage = req.file.filename;
+        }
+
+        // Check if the category name already exists (case-insensitive)
+        const isExisting = await Category.findOne({
+            name: new RegExp(`^${newName}$`, 'i'),
+            _id: { $ne: id } // Exclude current category ID from the check
+        });
+
+        if (isExisting) {
+            return res.status(400).json({ error: "Category already exists" });
+        }
+
+        // If no new image is uploaded, retain the existing image
+        if (!req.file) {
+            const existingCategory = await Category.findById(id);
+            if (existingCategory && existingCategory.categoryImage) {
+                categoryData.categoryImage = existingCategory.categoryImage;
+            }
+        }
+
+        await Category.updateOne({ _id: id }, { $set: categoryData });
+
+        res.status(200).json({ message: "Category updated successfully" });
     } catch (error) {
-        console.log(error.message,"Error in editCategory");
+        console.log(error.message, "Error in editCategory");
         res.status(500).send("Internal server error");
     }
 }

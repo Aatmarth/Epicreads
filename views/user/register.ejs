@@ -9,7 +9,8 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link active" id="register-tab" data-toggle="tab" href="#" role="tab"
-                        aria-controls="register" aria-selected="true">Register</a>
+                        aria-controls="register" aria-selected="true"
+                        style="background-color: transparent; color: #1CC0A0;">Register</a>
                 </li>
             </ul>
             <div class="tab-content" id="tab-content-5">
@@ -43,6 +44,12 @@
                             <input type="password" class="form-control" id="register-password" name="password" oninput="removeErrorMessage()">
                             <div id="error4" class="error-message text-danger"></div>
                         </div><!-- End .form-group -->
+                        
+                        <div class="form-group">
+                            <label for="confirm-password">Confirm Password*</label>
+                            <input type="password" class="form-control" id="confirm-password" name="confirmPassword" oninput="removeErrorMessage()">
+                            <div id="error5" class="error-message text-danger"></div>
+                        </div>
 
                         <div class="form-footer">
                             <button type="submit" class="btn btn-outline-primary-2">
@@ -72,7 +79,17 @@
 <script>
     function removeErrorMessage(){
 const errorMsg=document.getElementById("errormsg")
-errorMsg.innerHTML=''
+errorMsg.innerHTML='';
+error1.innerHTML = '';
+    error1.style.display = 'none';
+    error2.innerHTML = '';
+    error2.style.display = 'none';
+    error3.innerHTML = '';
+    error3.style.display = 'none';
+    error4.innerHTML = '';
+    error4.style.display = 'none';
+    error5.innerHTML = '';
+    error5.style.display = 'none';
     }
 
 
@@ -80,10 +97,12 @@ errorMsg.innerHTML=''
     const emailid = document.getElementById("register-email");
     const mobileid = document.getElementById("register-mobile");
     const passwordid = document.getElementById("register-password");
+    const confirmPassword = document.getElementById("confirm-password");
     const error1 = document.getElementById("error1");
     const error2 = document.getElementById("error2");
     const error3 = document.getElementById("error3");
     const error4 = document.getElementById("error4");
+    const error5 = document.getElementById("error5");
     const registerForm = document.getElementById("register-form");
 
     function nameCheck(e) {
@@ -147,12 +166,29 @@ errorMsg.innerHTML=''
         }
     }
 
+    function confirmPasswordCheck(e) {
+    const passwordVal = passwordid.value;
+    const confirmPasswordVal = confirmPassword.value;
+
+    if (confirmPasswordVal.trim() === "") {
+        error5.style.display = "block";
+        error5.innerHTML = "Please confirm your password";
+    } else if (passwordVal !== confirmPasswordVal) {
+        error5.style.display = "block";
+        error5.innerHTML = "Passwords do not match";
+    } else {
+        error5.style.display = "none";
+        error5.innerHTML = "";
+    }
+}
+
     document.addEventListener("DOMContentLoaded", () => {
         registerForm.addEventListener("submit", (e) => {
             nameCheck();
             emailCheck();
             mobileCheck();
             passwordCheck();
+            confirmPasswordCheck();
 
             if (
                 !nameid ||
@@ -163,6 +199,7 @@ errorMsg.innerHTML=''
                 !error2 ||
                 !error3 ||
                 !error4 ||
+                !error5 ||
                 !registerForm
             ) {
                 console.error("One or more elements not found");
@@ -172,7 +209,8 @@ errorMsg.innerHTML=''
                 error1.innerHTML ||
                 error2.innerHTML ||
                 error3.innerHTML ||
-                error4.innerHTML
+                error4.innerHTML ||
+                error5.innerHTML
             ) {
                 e.preventDefault();
             }

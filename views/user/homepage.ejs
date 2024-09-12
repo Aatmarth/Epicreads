@@ -11,7 +11,7 @@
 
                             <div class="banner-content d-flex justify-content-center align-items-end position-absolute w-100"
                                 style="bottom: 1px;">
-                                <a href="#" class="btn border border-light text-light banner-link">discover now<i
+                                <a href="/shop" class="btn border border-light text-light banner-link">discover now<i
                                         class="icon-long-arrow-right"></i></a>
                             </div><!-- End .banner-content -->
                         </div><!-- End .banner -->
@@ -20,18 +20,22 @@
             </div><!-- End .container -->
         </div><!-- End .intro-section -->
 
+        <h2 class="text-center text-uppercase text-decoration-underline">Hot Sale Underway!</h2>
+        <!-- <div class="box-container border border-success rounded" style="margin-left: 300px; margin-right: 300px;"> -->
         <div class="box">
-            <% for( let i=0; i < categories.length; i++ ) { %>
-                <% if(products[i] && products[i].productImage && products[i].productImage.length > 0) { %>
-                    <span style="--i: <%= i %>">
+            <% for( let i=0; i < products.length; i++ ) { %>
+                <% if(products[i] && products[i].productImage && products[i].productImage.length> 0) { %>
+                    <span class="border border-dark" style="--i: <%= i %>"
+                        onclick="window.location.href='/productPage?id=<%=products[i]._id%>'">
                         <img src="/productImages/<%= products[i].productImage[0] %>" alt="Product Image">
                     </span>
-                <% } else { %>
-                    <span style="--i: <%= i %>">
-                        <img src="/defaultImage.jpg" alt="Default Image"> <!-- Fallback image -->
-                    </span>
-                <% } %>
-            <% }; %>
+                    <% } else { %>
+                        <span style="--i: <%= i %>">
+                            <img src="/defaultImage.jpg" alt="Default Image"> <!-- Fallback image -->
+                        </span>
+                        <% } %>
+                            <% }; %>
+        </div>
         </div>
 
 
@@ -87,8 +91,8 @@
                                                 <%= products.productName%>
                                             </a></h3>
                                         <!-- End .product-title -->
-                                        <div class="product-cat">
-                                            <%=products.author%>
+                                        <div class="product-cat text-black">
+                                            <%=products.authorname%>
                                         </div><!-- End .product-cat -->
                                         <div class="product-price">
                                             <span class="new-price">₹<%=products.offerPrice%></span>
@@ -99,9 +103,15 @@
 
                                         <div class="product-footer">
                                             <div class="product-action">
-                                                <a href="#" class="btn-product btn-cart"><span>add to cart</span></a>
-                                                <a href="#" class="btn-product btn-wishlist"><span>Add to
-                                                        Wishlist</span></a>
+                                                <% if(products.quantity> 0){ %>
+                                                    <a onclick="addToCart('<%=products._id%>')"
+                                                        class="btn-product btn-cart"><span>add to cart</span></a>
+                                                    <% } else { %>
+                                                        <a href="#" class="btn-product btn-cart disabled"><span>Not
+                                                                Available</span></a>
+                                                        <% } %>
+                                                            <a href="#" class="btn-product btn-wishlist"><span>Add to
+                                                                    Wishlist</span></a>
                                             </div><!-- End .product-action -->
                                         </div><!-- End .product-footer -->
                                     </div><!-- End .product-body -->
@@ -151,33 +161,34 @@
                                         }
                                     }
                                 }'>
-                            <% newArrivals.forEach(products=> { %>
+                            <% newArrivals.forEach(product=> { %>
                                 <div class="product">
                                     <span class="product-label label-sale">Sale</span>
                                     <figure class="product-media">
-                                        <a href="/productPage?id=<%=products._id%>">
-                                            <img src="productImages/<%= products.productImage[0] %>" alt="Product image"
+                                        <a href="/productPage?id=<%=product._id%>">
+                                            <img src="productImages/<%= product.productImage[0] %>" alt="Product image"
                                                 class="product-image">
                                         </a>
                                     </figure><!-- End .product-media -->
                                     <div class="product-body">
-                                        <h3 class="product-title"><a href="/productPage?id=<%=products._id%>">
-                                                <%= products.productName%>
+                                        <h3 class="product-title"><a href="/productPage?id=<%=product._id%>">
+                                                <%= product.productName%>
                                             </a></h3>
                                         <!-- End .product-title -->
                                         <div class="product-cat">
-                                            <%=products.author%>
+                                            <%=product.author%>
                                         </div><!-- End .product-cat -->
                                         <div class="product-price">
-                                            <span class="new-price">₹<%=products.offerPrice%></span>
+                                            <span class="new-price">₹<%=product.offerPrice%></span>
                                         </div><!-- End .product-price -->
                                         <div class="old-price">
-                                            <span class="original-price">₹<%=products.productPrice%></span>
+                                            <span class="original-price">₹<%=product.productPrice%></span>
                                         </div>
 
                                         <div class="product-footer">
                                             <div class="product-action">
-                                                <a href="#" class="btn-product btn-cart"><span>add to cart</span></a>
+                                                <a onclick="addToCart('<%=products._id%>')"
+                                                    class="btn-product btn-cart"><span>add to cart</span></a>
                                                 <a href="#" class="btn-product btn-wishlist"><span>Add to
                                                         Wishlist</span></a>
                                             </div><!-- End .product-action -->
@@ -226,18 +237,41 @@
 
     </div><!-- End .page-wrapper -->
     <button id="scroll-top" title="Back to Top"><i class="icon-arrow-up text-success"></i></button>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <%- include("../partials/user/footer.ejs") %>
 
-        <% if (locals.message && message.length> 0) { %>
+        <script>
+            function addToCart(id) {
+                fetch('/addToCart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ productId: id, quantity: 1 })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Product added to cart successfully!');
+                        } else {
+                            alert('Error adding product to cart: ' + data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error adding product to cart:', error));
+            }
+        </script>
+
+
+        <!-- <% if (locals.message && message.length> 0) { %>
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
                     $('#signin-modal').modal('show');
                 });
             </script>
-            <% } %>
+            <% } %> -->
 
-                <script>
+        <!-- <script>
                     const nameid = document.getElementById("register-username");
                     const emailid = document.getElementById("register-email");
                     const mobileid = document.getElementById("register-mobile");
@@ -342,67 +376,67 @@
                         })
                     })
 
-                </script>
-                <style>
-                    .error-message {
-                        color: red;
-                        font-size: 1rem;
-                        display: none;
-                    }
+                </script> -->
+        <style>
+            .error-message {
+                color: red;
+                font-size: 1rem;
+                display: none;
+            }
 
 
-                    .box:hover {
-                        animation-play-state: paused;
-                    }
+            .box:hover {
+                animation-play-state: paused;
+            }
 
-                    .box {
-                        background-color: darkgray;
-                        top: 70px;
-                        left: 43%;
-                        margin-bottom: 150px;
-                        background-color: black;
-                        position: relative;
-                        width: 200px;
-                        height: 300px;
-                        transform-style: preserve-3d;
-                        transform: perspective(1000px);
-                        animation: animate 30s linear infinite;
-                    }
+            .box {
+                background-color: darkgray;
+                top: 70px;
+                left: 43%;
+                margin-bottom: 150px;
+                background-color: black;
+                position: relative;
+                width: 200px;
+                height: 300px;
+                transform-style: preserve-3d;
+                transform: perspective(1000px);
+                animation: animate 30s linear infinite;
+            }
 
-                    @keyframes animate {
-                        0% {
-                            transform: perspective(1000px) rotateY(0deg);
-                        }
+            @keyframes animate {
+                0% {
+                    transform: perspective(1000px) rotateY(0deg);
+                }
 
-                        100% {
-                            transform: perspective(1000px) rotateY(360deg);
-                        }
-                    }
+                100% {
+                    transform: perspective(1000px) rotateY(360deg);
+                }
+            }
 
-                    .box span {
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background: #fff;
-                        transform: rotateY(calc(var(--i) * 45deg)) translateZ(240px);
-                    }
+            .box span {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #fff;
+                transform: rotateY(calc(var(--i) * 45deg)) translateZ(240px);
+            }
 
-                    .box span::before {
-                        content: "";
-                        position: absolute;
-                        inset: 0;
-                        z-index: 2;
-                        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
-                    }
+            .box span::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                z-index: 2;
+                box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+            }
 
-                    .box span img {
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                </style>
+            .box span img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        </style>

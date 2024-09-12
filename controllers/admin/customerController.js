@@ -1,43 +1,39 @@
 const User = require("../../models/userSchema");
 
-const customerInfo = async(req,res)=>{
+const customerInfo = async (req, res) => {
     try {
-        let search = "";
-        if(req.query.search){
-            search = req.query.search;
-        }
-        let page= 1;
-        if(req.query.page){
-            page= req.query.page;
-        }
-        const limit =3;
+        const search = req.query.search || "";
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+
         const userData = await User.find({
-            isAdmin:0,
-            $or:[
-                {name:{$regex:".*"+search+".*"}},
-                {email:{$regex:".*"+search+".*"}},
+            isAdmin: 0,
+            $or: [
+                { name: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } },
             ]
         })
-        .limit(limit*1)
-        .skip((page-1)*limit)
+        .limit(limit)
+        .skip((page - 1) * limit)
         .exec();
 
-        const count= await User.find({
-            isAdmin:0,
-            $or:[
-                {name:{$regex:".*"+search+".*"}},
-                {email:{$regex:".*"+search+".*"}},
+        const count = await User.countDocuments({
+            isAdmin: 0,
+            $or: [
+                { name: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } },
             ]
-        }).countDocuments();
+        });
 
-        res.render("customers",{
-            data:userData,
-            totalPages:Math.ceil(count/limit),
-            currentPage:page
-        })
+        res.render("customers", {
+            data: userData,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            search
+        });
     } catch (error) {
-        console.log(error.message,"Error in customer info");
-        res.status(500).send("Internal server error")
+        console.log(error.message, "Error in customer info");
+        res.status(500).send("Internal server error");
     }
 }
 

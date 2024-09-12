@@ -2,102 +2,111 @@
 <link href="https://unpkg.com/cropperjs/dist/cropper.min.css" rel="stylesheet">
 <script src="https://unpkg.com/cropperjs/dist/cropper.min.js"></script>
 
-    <div class="container form-container">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">Add Product</h4>
-            </div>
-            <div class="card-body">
-                <form action="/admin/addProduct" method="POST" enctype="multipart/form-data">
-                    <div class="form-row">
-                        <div class="form-group col-md-6 mt-2">
-                            <label for="productName">Product Name</label>
-                            <input type="text" class="form-control" id="productName" name="productName" required>
-                        </div>
-                        <div class="form-group col-md-6 mt-2">
-                            <label for="author">Author</label>
-                            <input type="text" class="form-control" id="author" name="authorname" required>
-                        </div>
-                        <div class="form-group col-md-6 mt-2">
-                            <label for="year">Published Year</label>
-                            <input type="text" class="form-control" id="publishedYear" name="publishedYear" required>
-                        </div>
-                        <div class="form-group col-md-6 mt-2">
-                            <label for="category">Category</label>
-                            <select name="category" class="form-control">
-                                <option value="" disabled selected>Select a category</option>
-                                <% for(let category of categories){ %>
-                                <option value="<%= category._id %>"><%= category.name %></option>
-                                <% } %>
-                            </select>
-                        </div>
-                        <div class="form-group col-md-6 mt-2">
-                            <label for="productDescription">Description</label>
-                            <textarea class="form-control" id="productDescription" name="productDescription" rows="3" required></textarea>
-                        </div>
-                        
-                        <div class="form-row mt-2">
-                            <div class="form-group col-md-4 mt-2">
-                                <label for="productPrice">Price</label>
-                                <input type="number" class="form-control" id="productPrice" name="productPrice" required>
-                            </div>
-                            <div class="form-group col-md-4 mt-2">
-                                <label for="offerPrice">Offer Price</label>
-                                <input type="number" class="form-control" id="offerPrice" name="offerPrice">
-                            </div>
-                        </div>
-                        
-                        <div class="form-row mt-2">
-                            <div class="form-group col-md-3 mt-2">
-                                <label for="pageCount">Page Count</label>
-                                <input type="number" class="form-control" id="pageCount" name="pageCount" required>
-                            </div>
-                            <div class="form-group col-md-6 mt-2">
-                                <label for="quantity">Quantity</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" required>
-                            </div>
-                        </div>
+<div class="container form-container">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Add Product</h4>
+        </div>
+        <div class="card-body">
+            <form action="/admin/addProduct" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+                <div class="form-row">
+                    <div class="form-group col-md-6 mt-2">
+                        <label for="productName">Product Name</label>
+                        <input type="text" class="form-control" id="productName" name="productName">
+                        <div class="text-danger" id="productNameError"></div>
+                    </div>
+                    <div class="form-group col-md-6 mt-2">
+                        <label for="author">Author</label>
+                        <input type="text" class="form-control" id="author" name="authorname">
+                        <div class="text-danger" id="authorError"></div>
+                    </div>
+                    <div class="form-group col-md-6 mt-2">
+                        <label for="year">Published Year</label>
+                        <input type="text" class="form-control" id="publishedYear" name="publishedYear">
+                        <div class="text-danger" id="publishedYearError"></div>
+                    </div>
+                    <div class="form-group col-md-6 mt-2">
+                        <label for="category">Category</label>
+                        <select name="category" class="form-control" id="category">
+                            <option value="" disabled selected>Select a category</option>
+                            <% for(let category of categories){ %>
+                            <option value="<%= category._id %>"><%= category.name %></option>
+                            <% } %>
+                        </select>
+                        <div class="text-danger" id="categoryError"></div>
+                    </div>
+                    <div class="form-group col-md-6 mt-2">
+                        <label for="productDescription">Description</label>
+                        <textarea class="form-control" id="productDescription" name="productDescription" rows="3"></textarea>
+                        <div class="text-danger" id="productDescriptionError"></div>
+                    </div>
 
-  
+                    <div class="form-row mt-2">
+                        <div class="form-group col-md-4 mt-2">
+                            <label for="productPrice">Price</label>
+                            <input type="number" class="form-control" id="productPrice" name="productPrice">
+                            <div class="text-danger" id="productPriceError"></div>
+                        </div>
+                        <div class="form-group col-md-4 mt-2">
+                            <label for="offerPrice">Offer Price</label>
+                            <input type="number" class="form-control" id="offerPrice" name="offerPrice">
+                            <div class="text-danger" id="offerPriceError"></div>
+                            <div class="text-warning" id="offerPriceWarning"></div>
+                        </div>
+                    </div>
 
-                        <div class="form-group mt-2">
-                            <label for="productImage">Product Image</label>
-                            <div class="row" id="image-upload-container">
-                                <div class="col-12">
-                                    <input type="file" class="form-control-file" name="productImage" required onchange="handleFileUpload(this)">
-                                    <img src="" class="product-img img-fluid mt-2" onclick="openCropper(this)" style="display:none;">
+                    <div class="form-row mt-2">
+                        <div class="form-group col-md-3 mt-2">
+                            <label for="pageCount">Page Count</label>
+                            <input type="number" class="form-control" id="pageCount" name="pageCount">
+                            <div class="text-danger" id="pageCountError"></div>
+                        </div>
+                        <div class="form-group col-md-6 mt-2">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity">
+                            <div class="text-danger" id="quantityError"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <label for="productImage">Product Image</label>
+                        <div class="row" id="image-upload-container">
+                            <div class="col-12">
+                                <input type="file" class="form-control-file" name="productImage" onchange="handleFileUpload(this)">
+                                <img src="" class="product-img img-fluid mt-2" onclick="openCropper(this)" style="display:none;">
+                                <div class="text-danger" id="productImageError"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal for cropping -->
+                    <div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="cropperModalLabel">Crop Image</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <img id="cropperImage" src="" class="img-fluid" alt="Image for cropping" />
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" onclick="cropImage()">Crop & Replace</button>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Modal for cropping -->
-                        <div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="cropperModalLabel">Crop Image</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <img id="cropperImage" src="" class="img-fluid" alt="Image for cropping" />
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary" onclick="cropImage()">Crop & Replace</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    </div>
 
-
-                        <div class="form-group mt-2">
-                            <label for="status">Status</label>
-                            <select class="form-control" id="status" name="status" required>
-                                <option value="Available">Available</option>
-                                <option value="Sold out">Sold out</option>
-                                <option value="Discontinued">Discontinued</option>
-                            </select>
-                        </div>
+                    <div class="form-group mt-2">
+                        <label for="status">Status</label>
+                        <select class="form-control" id="status" name="status">
+                            <option value="Available">Available</option>
+                            <option value="Sold out">Sold out</option>
+                            <option value="Discontinued">Discontinued</option>
+                        </select>
+                        <div class="text-danger" id="statusError"></div>
+                    </div>
 
                     <button type="submit" class="btn btn-primary btn-block mt-3">Add Product</button>
                 </form>
@@ -114,8 +123,8 @@
         }
 
         .product-img{
-            width: 100px;
-    height: auto;
+            width: auto;
+    height: 150px;
     object-fit: contain;
         }
     </style>
@@ -229,6 +238,121 @@
                 imgElement.style.display = 'none';
             }
         }
+    </script>
+    <script>
+        function validateForm() {
+    let valid = true;
+
+    // Product Name Validation
+    let productName = document.getElementById('productName').value;
+    if (productName.trim() === "") {
+        document.getElementById('productNameError').innerText = "Product name is required.";
+        valid = false;
+    } else {
+        document.getElementById('productNameError').innerText = "";
+    }
+
+    // Author Name Validation
+    let authorName = document.getElementById('author').value;
+    if (authorName.trim() === "") {
+        document.getElementById('authorError').innerText = "Author name is required.";
+        valid = false;
+    } else {
+        document.getElementById('authorError').innerText = "";
+    }
+
+    // Published Year Validation
+    let publishedYear = document.getElementById('publishedYear').value;
+    if (publishedYear.trim() === "") {
+        document.getElementById('publishedYearError').innerText = "Published year is required.";
+        valid = false;
+    } else if (!/^\d{4}$/.test(publishedYear)) {
+        document.getElementById('publishedYearError').innerText = "Please enter a valid 4-digit year.";
+        valid = false;
+    } else {
+        document.getElementById('publishedYearError').innerText = "";
+    }
+
+    // Category Validation
+    let category = document.getElementById('category').value;
+    if (category === "") {
+        document.getElementById('categoryError').innerText = "Category is required.";
+        valid = false;
+    } else {
+        document.getElementById('categoryError').innerText = "";
+    }
+
+    // Product Description Validation
+    let productDescription = document.getElementById('productDescription').value;
+    if (productDescription.trim() === "") {
+        document.getElementById('productDescriptionError').innerText = "Product description is required.";
+        valid = false;
+    } else {
+        document.getElementById('productDescriptionError').innerText = "";
+    }
+
+    // Product Price Validation
+    let productPrice = document.getElementById('productPrice').value;
+    if (productPrice.trim() === "" || isNaN(productPrice) || parseFloat(productPrice) <= 0) {
+        document.getElementById('productPriceError').innerText = "Please enter a valid price.";
+        valid = false;
+    } else {
+        document.getElementById('productPriceError').innerText = "";
+    }
+
+    // Offer Price Validation
+    let offerPrice = document.getElementById('offerPrice').value;
+    if (offerPrice.trim() !== "") {
+        if (isNaN(offerPrice) || parseFloat(offerPrice) < 0) {
+            document.getElementById('offerPriceError').innerText = "Please enter a valid offer price.";
+            valid = false;
+        } else if (parseFloat(offerPrice) > parseFloat(productPrice)) {
+            document.getElementById('offerPriceWarning').innerText = "Offer price should be lower than the actual price.";
+            valid = false;
+        } else {
+            document.getElementById('offerPriceWarning').innerText = "";
+            document.getElementById('offerPriceError').innerText = "";
+        }
+    }
+
+    // Page Count Validation
+    let pageCount = document.getElementById('pageCount').value;
+    if (pageCount.trim() === "" || isNaN(pageCount) || parseInt(pageCount) <= 0) {
+        document.getElementById('pageCountError').innerText = "Please enter a valid page count.";
+        valid = false;
+    } else {
+        document.getElementById('pageCountError').innerText = "";
+    }
+
+    // Quantity Validation
+    let quantity = document.getElementById('quantity').value;
+    if (quantity.trim() === "" || isNaN(quantity) || parseInt(quantity) < 0) {
+        document.getElementById('quantityError').innerText = "Please enter a valid quantity.";
+        valid = false;
+    } else {
+        document.getElementById('quantityError').innerText = "";
+    }
+
+    // Product Image Validation (optional but recommended)
+    let productImage = document.querySelector('input[name="productImage"]').value;
+    if (productImage.trim() === "") {
+        document.getElementById('productImageError').innerText = "Product image is required.";
+        valid = false;
+    } else {
+        document.getElementById('productImageError').innerText = "";
+    }
+
+    // Status Validation
+    let status = document.getElementById('status').value;
+    if (status.trim() === "") {
+        document.getElementById('statusError').innerText = "Status is required.";
+        valid = false;
+    } else {
+        document.getElementById('statusError').innerText = "";
+    }
+
+    return valid;
+}
     </script>
     
     

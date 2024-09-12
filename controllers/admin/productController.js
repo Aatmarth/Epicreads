@@ -5,36 +5,40 @@ const upload = require("../../middlewares/multer");
 
 const productInfo = async (req, res) => {
   try {
-    let search = "";
-    if (req.query.search) {
-      search = req.query.search;
-    }
-    let page = 1;
-    if (req.query.page) {
-      page = req.query.page;
-    }
+      let search = req.query.search || "";
+      let page = parseInt(req.query.page) || 1;
+      const limit = 3;
 
-    const limit = 5;
-    const productsData = await Product.find({})
-      .limit(limit * 1)
+      const productsData = await Product.find({
+          $or: [
+              { productName: { $regex: ".*" + search + ".*", $options: "i" } },
+              { authorname: { $regex: ".*" + search + ".*", $options: "i" } },
+              { 'category.name': { $regex: ".*" + search + ".*", $options: "i" } }
+          ]
+      })
+      .limit(limit)
       .skip((page - 1) * limit)
+      .populate("category")
       .exec();
 
-    const count = await Product.find({
-      productName: { $regex: ".*" + search + ".*" },
-    }).countDocuments();
-    const data = await Product.find({}).populate("category");
+      const count = await Product.countDocuments({
+          $or: [
+              { productName: { $regex: ".*" + search + ".*", $options: "i" } },
+              { authorname: { $regex: ".*" + search + ".*", $options: "i" } },
+              { 'category.name': { $regex: ".*" + search + ".*", $options: "i" } }
+          ]
+      });
 
-    res.render("products", {
-      data,
-      // data:productsData,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
-      limit: limit,
-    });
+      res.render("products", {
+          data: productsData,
+          totalPages: Math.ceil(count / limit),
+          currentPage: page,
+          limit: limit,
+          search: search 
+      });
   } catch (error) {
-    console.log(error.message, "Error in product info");
-    res.status(500).send("Internal server error");
+      console.log(error.message, "Error in product info");
+      res.status(500).send("Internal server error");
   }
 };
 
