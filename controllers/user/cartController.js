@@ -4,17 +4,20 @@ const User = require("../../models/userSchema");
 
 const loadCart = async (req, res) => {
   try {
-    console.log("reached loadCart");
-
     const user = req.session.user;
     const userData = await User.findOne({ _id: user });
     if (!user) {
       return res.render("login", { message: "Please Login First" });
     }
 
-    const cart = await Cart.findOne({ userId: user }).populate(
-      "items.productId"
-    );
+    const cart = await Cart.findOne({ userId: user }).populate({
+      path: "items.productId",
+      populate: {
+        path: "category",
+        select: "isListed",
+      },
+    });
+
     if (!cart) {
       return res.render("cart", {
         user: userData,
@@ -26,22 +29,38 @@ const loadCart = async (req, res) => {
     }
 
     let subtotal = 0;
-    cart.items.forEach((item) => {
-      subtotal += item.productId.offerPrice * item.quantity;
+    const filteredItems = cart.items.filter((item) => {
+      const product = item.productId;
+      const category = product.category;
+
+    
+      return product.isListed && category.isListed;
     });
 
-    const shippingCharge = 60;
+    filteredItems.forEach((item) => {
+      const product = item.productId;
+      const effectivePrice = product.offerPercentage > 0
+        ? product.productPrice * (1 - product.offerPercentage / 100)
+        : product.offerPrice;
+      subtotal += effectivePrice * item.quantity;
+
+      item.price = effectivePrice;
+      item.totalPrice = effectivePrice * item.quantity;
+    });
+
+    let shippingCharge = subtotal > 1000 ? 0 : 60;
     const total = subtotal + shippingCharge;
 
     res.render("cart", {
-      cartItems: cart.items,
+      user: userData,
+      cartItems: filteredItems,
       subtotal,
       shippingCharge,
       total,
     });
   } catch (error) {
     console.log(error.message, "Error in load cart");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -49,15 +68,18 @@ const addToCart = async (req, res) => {
   try {
     if (req.session.user) {
       const { productId, quantity = 1 } = req.body;
-      console.log("reached cart");
       const product = await Product.findById(productId);
       if (!product) {
         return res
           .status(404)
           .json({ success: false, message: "Product not found" });
       }
+
       const cart = await Cart.findOne({ userId: req.session.user });
-      console.log("cart", cart);
+
+      const effectivePrice = product.offerPercentage > 0 
+        ? (product.productPrice * (1 - product.offerPercentage / 100)) 
+        : product.offerPrice;
 
       if (!cart) {
         const newCart = new Cart({
@@ -66,8 +88,8 @@ const addToCart = async (req, res) => {
             {
               productId: productId,
               quantity: quantity,
-              price: product.offerPrice,
-              totalPrice: product.offerPrice * quantity,
+              price: effectivePrice,
+              totalPrice: effectivePrice * quantity,
             },
           ],
         });
@@ -76,33 +98,38 @@ const addToCart = async (req, res) => {
           .status(200)
           .json({ success: true, message: "Product added to cart" });
       }
+
       const existingItem = cart.items.find(
         (item) => item.productId.toString() === productId.toString()
       );
       if (existingItem) {
         existingItem.quantity += quantity;
-        existingItem.totalPrice = existingItem.quantity * product.offerPrice;
+        existingItem.price = effectivePrice;
+        existingItem.totalPrice = existingItem.quantity * effectivePrice;
         await cart.save();
         return res
           .status(200)
-          .json({ success: true, message: "Product quantity updated in cart" });
+          .json({ success: true, message: "Product quantity updated in cart" }); 
       }
+
       cart.items.push({
         productId: productId,
         quantity: quantity,
-        price: product.offerPrice,
-        totalPrice: product.offerPrice * quantity,
+        price: effectivePrice,
+        totalPrice: effectivePrice * quantity,
       });
       await cart.save();
       return res
         .status(200)
         .json({ success: true, message: "Product added to cart" });
-    }else{
-      res.render("login", { message: "Please Login First" });
+    } else {
+      return res
+        .status(401)
+        .json({ success: false, message: "Please Login First" });
     }
   } catch (error) {
     console.log(error.message, "Error in add to cart");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -113,24 +140,33 @@ const updateCart = async (req, res) => {
 
     const cart = await Cart.findOne({ userId });
     if (!cart) {
-      return res.json({ success: false }); // Respond with JSON
+      return res.json({ success: false });
     }
 
-    cart.items.forEach((item) => {
+ 
+    for (const item of cart.items) {
+      const product = await Product.findById(item.productId);
+      if (!product) continue;
+
+      const effectivePrice = product.offerPercentage > 0 
+        ? (product.productPrice * (1 - product.offerPercentage / 100)) 
+        : product.offerPrice;
+
       if (quantities[item.productId]) {
         item.quantity = parseInt(quantities[item.productId], 10);
-        item.totalPrice = item.quantity * item.price;
+        item.price = effectivePrice;
+        item.totalPrice = item.quantity * effectivePrice;
       }
-    });
+    }
 
     await cart.save();
-
-    res.json({ success: true }); // Respond with JSON
+    res.json({ success: true });
   } catch (error) {
     console.log(error.message, "Error in updating cart");
     res.status(500).json({ success: false });
   }
 };
+
 
 const removeProductFromCart = async (req, res) => {
   try {
@@ -142,19 +178,32 @@ const removeProductFromCart = async (req, res) => {
       return res.json({ success: false });
     }
 
-    // Remove the product from the cart
     cart.items = cart.items.filter(
       (item) => item.productId.toString() !== productId
     );
 
     await cart.save();
 
-    res.json({ success: true });
+    let subtotal = 0;
+    cart.items.forEach(item => {
+      subtotal += item.totalPrice;
+    });
+
+    const shippingCharge = subtotal > 1000 ? 0 : 60;
+    const total = subtotal + shippingCharge;
+
+    res.json({
+      success: true,
+      subtotal,
+      shippingCharge,
+      total,
+    });
   } catch (error) {
     console.log(error.message, "Error in removing product from cart");
     res.status(500).json({ success: false });
   }
 };
+
 
 module.exports = {
   loadCart,

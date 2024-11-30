@@ -20,7 +20,7 @@ const userAuth = (req, res, next) => {
 };
 
 const isBlocked = (req, res, next) => {
-  const userId = req.query.userId || req.body.userId || req.session.user;
+  const userId =req.session.user;
 
   if (!userId) {
     next();
@@ -30,7 +30,6 @@ const isBlocked = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (user) {
-        console.log(user);
 
         if (!user.isBlocked) {
           next();
@@ -41,6 +40,8 @@ const isBlocked = (req, res, next) => {
         res.redirect("/login", { message: "User not found" });
       }
     })
+
+
     .catch((error) => {
       console.log(error.message, "Error in user auth middleware");
       res.status(500).send("Internal server error");

@@ -1,0 +1,258 @@
+<%- include("../partials/user/header.ejs") %>
+
+<main class="main">
+    <nav aria-label="breadcrumb" class="breadcrumb-nav mb-2">
+        <div class="container">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/userProfile">Account</a></li>
+                <li class="breadcrumb-item active" aria-current="page">My Orders</li>
+            </ol>
+        </div><!-- End .container -->
+    </nav><!-- End .breadcrumb-nav -->
+    <div class="page-header text-center" style="background-image: url('assets/images/page-header-bg.jpg')">
+        <div class="container">
+            <h1 class="page-title">My Orders</h1>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <div class="container">
+            <% if (orders.length === 0) { %>
+                <h3 class="text-center">You have no orders.</h3>
+            <% } else { %>
+                <div class="row">
+                    <% orders.forEach(order => { %>
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <!-- Order ID and Status -->
+                                    <h5 class="card-title">Order ID: <%= order.orderId %></h5>
+                                    <p class="card-text"><strong>Status:</strong> <%= order.status %></p>
+
+                                    <!-- Ordered Items with Images -->
+                                    <h6>Items:</h6>
+                                    <ul>
+                                        <% order.orderedItems.forEach(item => { %>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="/productImages/<%= item.productId.productImage[0] %>" alt="Product Image" class="img-thumbnail" style="width: auto; height: 100px; object-fit: cover;">
+                                                    <div class="ml-3">
+                                                        Product: <a href="/productPage?id=<%= item.productId._id %>"><%= item.productId.productName %></a><br>
+                                                        Quantity: <%= item.quantity %> | 
+                                                        Price: ₹<%= item.price.toFixed(2) %>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        <% }) %>
+                                    </ul>
+
+                                    <!-- Total Price and Final Price -->
+                                    <p class="card-text"><strong>Total Price:</strong>  ₹<%= order.totalPrice.toFixed(2) %></p>
+
+                                    <!-- View Full Details Button -->
+                                    <a href="/orderDetails?id=<%= order._id %>" class="btn btn-outline-success">View Full Details</a>
+
+
+                                    <% if(order.paymentMethod==="Payment Pending"){ %>
+                                        <button onclick='retryPayment(<%= JSON.stringify(order) %>)' class="btn btn-outline-danger">Retry Payment</button>
+                                        <% } %>
+                                    <% if (order.status === 'Pending' && order.paymentMethod !== 'Payment Pending') { %>
+                                        <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-outline-danger">Cancel Order</button>
+                                    <% } %>
+                                    <% if (order.status === "Delivered") { %>
+                                        <button onclick="returnOrder('<%= order._id %>')" class="btn btn-outline-danger">Return Order</button>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    async function cancelOrder(orderId) {
+        // First show a confirmation alert
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to cancel this order?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it',
+            reverseButtons: true // Puts the cancel button on the left and confirm on the right
+        });
+
+        // If the user confirms cancellation
+        if (result.isConfirmed) {
+            try {
+                const response = await axios.post('/cancelOrder', { orderId });
+
+                if (response.data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Cancelled!',
+                        text: 'Your order has been successfully cancelled.',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.reload(); // Reload the page after cancellation
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.data.message || 'Unable to cancel the order. Please try again later.'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while cancelling the order. Please try again.'
+                });
+            }
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            // If the user chooses not to cancel the order
+            Swal.fire({
+                title: 'Cancelled',
+                text: 'Your order is safe!',
+                icon: 'info',
+                confirmButtonText: 'OK'
+            });
+        }
+    }
+
+async function retryPayment(orderData) {
+    console.log("Order data received:", orderData); // Debugging line
+
+    // Check if order data is valid
+    if (!orderData || !orderData.finalPrice) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Order not found or invalid order data. Please try again later.'
+        });
+        return;
+    }
+
+    // Create the Razorpay order with the final price
+    try {
+        const razorpayOrder = await axios.post('/placeRazorpayOrder', {
+            totalPrice: orderData.finalPrice, // Amount should be in paise
+            currency: "INR",
+            receipt: orderData.orderId // Use a unique receipt ID
+        });
+        console.log("Razorpay order response:", razorpayOrder.data); // Debugging line
+
+        if (razorpayOrder.data.success) {
+            const options = {
+                key: razorpayOrder.data.key_id,
+                amount: razorpayOrder.data.order.amount/100,
+                currency: "INR",
+                name: "Epicreads",
+                description: "Order Payment",
+                order_id: razorpayOrder.data.order.id, // Razorpay Order ID
+                
+                handler: async function (response) {
+                    const updateOrderResponse = await axios.post('/updatePaymentMethod', {
+                        orderId: orderData.orderId, // Correctly referencing orderId
+                        paymentMethod: 'Razorpay',
+                        paymentId: response.razorpay_payment_id // Pass the payment ID
+                    });
+
+                    if (updateOrderResponse.data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Payment Successful!',
+                            text: 'Your payment has been processed successfully.',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.reload(); // Reload to see updated order
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to update payment method. Please try again.'
+                        });
+                    }
+                },
+                theme: {
+                    color: "#3399cc"
+                }
+            };
+            console.log("options:", options)
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            throw new Error('Failed to create Razorpay order.');
+        }
+    } catch (error) {
+        console.error("Error during payment process:", error); // Log the error for debugging
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.response ? error.response.data.message : 'Something went wrong, please try again!'
+        });
+    }
+}
+
+async function returnOrder(orderId) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to return this order?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, return it!',
+            cancelButtonText: 'No, keep it',
+            reverseButtons: true
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await axios.post('/returnOrder', { orderId });
+                if (response.data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Returned!',
+                        text: 'Your return request has been successfully submitted.',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.data.message || 'Unable to process return request. Please try again later.'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while processing the return request. Please try again.'
+                });
+            }
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            Swal.fire({
+                title: 'Cancelled',
+                text: 'Your return request has been cancelled!',
+                icon: 'info',
+                confirmButtonText: 'OK'
+            });
+        }
+    }
+
+
+
+</script>

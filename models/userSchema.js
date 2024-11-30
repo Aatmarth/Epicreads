@@ -41,6 +41,36 @@ const userSchema = new Schema({
         type: Number,
         default: 0
     },
+    walletHistory: [{
+        transactionId: {
+            type: String,
+            unique: true,
+            default: () => `TRX${Date.now()}${Math.floor(Math.random() * 1000)}`
+        },
+        type: {
+            type: String,
+            enum: ["Credit", "Debit"]
+        },
+        amount: {
+            type: Number,
+            required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now
+        },
+        description: {
+            type: String,
+            default: ""
+        }
+    }],
+    referralCode: {
+        type: String,
+    },
+    referredBy: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     wishlist: {
         type: Schema.Types.ObjectId,
         ref: "Wishlist"

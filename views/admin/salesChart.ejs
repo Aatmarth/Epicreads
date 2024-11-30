@@ -1,0 +1,130 @@
+<%- include("../partials/admin/header.ejs") %>
+
+<div class="container mt-5">
+    <h2 class="text-center text-uppercase mb-4">Sales Overview</h2>
+    <div>
+        <a href="/admin/salesReport" class="btn btn-outline-success mb-2">Go to Sales Report</a>
+    </div>
+
+    <!-- Sales Summary Section -->
+    <div class="row">
+        <!-- Daily Sales Chart -->
+        <div class="col-md-4">
+            <div class="card p-4">
+                <h5 class="text-center">Daily Sales</h5>
+                <p class="text-center display-6">₹<%= salesData.daily.toFixed(2) %></p>
+                <canvas id="dailySalesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Weekly Sales Chart -->
+        <div class="col-md-4">
+            <div class="card p-4">
+                <h5 class="text-center">Weekly Sales</h5>
+                <p class="text-center display-6">₹<%= salesData.weekly.toFixed(2) %></p>
+                <canvas id="weeklySalesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Yearly Sales Chart -->
+        <div class="col-md-4">
+            <div class="card p-4">
+                <h5 class="text-center">Yearly Sales</h5>
+                <p class="text-center display-6">₹<%= salesData.yearly.toFixed(2) %></p>
+                <canvas id="yearlySalesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top 10 Products Section -->
+<div class="mt-5">
+    <h3 class="text-center text-uppercase mb-4">Top 10 Products</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Product Image</th>
+                <th>Category</th>
+                <th>Orders</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% topProducts.forEach(product => { %>
+    <tr>
+        <td><%= product.productName %></td>
+        <td>
+            <% if (product.productImage) { %>
+                <img src="/productImages/<%= product.productImage %>" alt="Product Image" style="height: 100px; width: auto;">
+            <% } else { %>
+                No image available
+            <% } %>
+        </td>
+        <td><%= product.categoryName %></td>
+        <td><%= product.orderCount %></td>
+    </tr>
+<% }); %>
+
+            
+        </tbody>
+    </table>
+</div>
+
+<!-- Top 5 Categories Section -->
+<div class="mt-5">
+    <h3 class="text-center text-uppercase mb-4">Top 5 Categories</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Category Name</th>
+                <th>Orders</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% topCategories.forEach(category => { %>
+                <tr>
+                    <td><%= category.categoryName %></td>
+                    <td><%= category.orderCount %></td> <!-- Updated here -->
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.1"></script>
+
+<script>
+    // Data for sales charts
+    const dailySalesData = <%= salesData.daily %>;
+    const weeklySalesData = <%= salesData.weekly %>;
+    const yearlySalesData = <%= salesData.yearly %>;
+
+    // Rendering Sales Charts
+    const salesChartConfigs = [
+        { id: 'dailySalesChart', data: dailySalesData, title: 'Daily Sales' },
+        { id: 'weeklySalesChart', data: weeklySalesData, title: 'Weekly Sales' },
+        { id: 'yearlySalesChart', data: yearlySalesData, title: 'Yearly Sales' }
+    ];
+    
+    salesChartConfigs.forEach(config => {
+        new Chart(document.getElementById(config.id).getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Sales'],
+                datasets: [{
+                    label: config.title,
+                    data: [config.data],
+                    backgroundColor: '#4CAF50',
+                    borderColor: '#3e95cd',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    });
+</script>

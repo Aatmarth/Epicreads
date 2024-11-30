@@ -1,0 +1,106 @@
+<%- include("../partials/admin/header.ejs") %>
+
+<div class="container form-container">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Add a New Coupon</h4>
+        </div>
+        <div class="card-body">
+            <form id="couponForm" action="/admin/addCoupon" method="POST">
+                <!-- Coupon Code -->
+                <div class="form-group">
+                    <label for="couponCode">Coupon Code:</label>
+                    <input type="text" id="couponCode" name="couponCode" class="form-control" >
+                </div>
+
+                <!-- Expiry Date -->
+                <div class="form-group">
+                    <label for="expireOn">Expiry Date:</label>
+                    <input type="date" id="expireOn" name="expireOn" class="form-control" >
+                </div>
+
+                <!-- Offer Price -->
+                <div class="form-group">
+                    <label for="offerPrice">Offer Price:</label>
+                    <input type="number" id="offerPrice" name="offerPrice" min="0" class="form-control" >
+                </div>
+
+                <!-- Minimum Price -->
+                <div class="form-group">
+                    <label for="minimumPrice">Minimum Purchase Amount:</label>
+                    <input type="number" id="minimumPrice" name="minimumPrice" min="0" class="form-control" >
+                </div>
+
+                <!-- Is Active -->
+                <div class="form-group">
+                    <label for="isActive">Is Active:</label>
+                    <input type="checkbox" id="isActive" name="isActive">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary btn-block mt-3">Add Coupon</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-container {
+        margin-top: 20px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+<!-- SweetAlert and Form Validation Script -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('couponForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const couponCode = document.getElementById('couponCode').value;
+        const expireOn = document.getElementById('expireOn').value;
+        const offerPrice = document.getElementById('offerPrice').value;
+        const minimumPrice = document.getElementById('minimumPrice').value;
+
+        // Validate fields
+        if (!couponCode || !expireOn || !offerPrice || !minimumPrice) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'All fields are required!',
+            });
+            return;
+        }
+
+        if (offerPrice <= 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Offer Price',
+                text: 'Offer Price must be greater than zero.',
+            });
+            return;
+        }
+
+        if (minimumPrice <= 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Minimum Purchase Amount',
+                text: 'Minimum Purchase Amount must be greater than zero.',
+            });
+            return;
+        }
+
+        // Show success alert before submitting the form
+        Swal.fire({
+            icon: 'success',
+            title: 'Coupon Added!',
+            text: 'Your coupon has been successfully added.',
+        }).then(() => {
+            document.getElementById('couponForm').submit(); // Submit the form
+        });
+    });
+</script>
+
+<%- include("../partials/admin/footer.ejs") %>

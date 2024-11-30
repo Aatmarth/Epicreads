@@ -94,39 +94,6 @@
         // Disable resend button initially
         resendButton.disabled = true;
 
-
-        // let timer = 30;
-        // let timerInterval ;
-
-
-        // function startTimer() {
-        //     timerInterval= setInterval(()=>{
-        //         timer--;
-        //         document.getElementById("timerValue").textContent=timer;
-        //         if (timer <= 0) {
-        //             clearInterval(timerInterval);
-        //             document.getElementById("timerValue").classList.add("expired")
-        //             document.getElementById('timerValue').textContent = 'OTP expired';
-        //             document.getElementById('otp').disabled = true;
-        //         }
-        //     },1000)
-        // }
-
-
-
-
-        // resendButton.addEventListener('click', function () {
-        //     timeLeft = 30;
-        //     resendButton.disabled = true;
-        //     Swal.fire({
-        //         icon: 'info',
-        //         title: 'OTP Resent',
-        //         text: 'A new OTP has been sent to your email.',
-        //     });
-        // });
-
-        // resendButton.disabled = true;
-
         function validateOTP() {
             const otpInput = document.getElementById('otp').value;
             $.ajax({
@@ -172,9 +139,6 @@
                 headers:{
                     'Content-Type':'application/json'
                 },
-                // body:JSON.stringify({
-                //     hello:'hello'
-                // })
             })
             clearInterval(updateTimer);
             timeLeft=60;

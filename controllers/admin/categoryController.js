@@ -91,8 +91,6 @@ const loadEditCategory = async(req,res)=>{
 const editCategory = async(req, res)=>{
     try {
         let id = req.params.id;
-
-        // Convert the category name to lowercase for case-insensitive check
         const newName = req.body.name.trim().toLowerCase();
 
         const categoryData = {
@@ -103,18 +101,15 @@ const editCategory = async(req, res)=>{
         if (req.file) {
             categoryData.categoryImage = req.file.filename;
         }
-
-        // Check if the category name already exists (case-insensitive)
         const isExisting = await Category.findOne({
             name: new RegExp(`^${newName}$`, 'i'),
-            _id: { $ne: id } // Exclude current category ID from the check
+            _id: { $ne: id }
         });
 
         if (isExisting) {
             return res.status(400).json({ error: "Category already exists" });
         }
 
-        // If no new image is uploaded, retain the existing image
         if (!req.file) {
             const existingCategory = await Category.findById(id);
             if (existingCategory && existingCategory.categoryImage) {

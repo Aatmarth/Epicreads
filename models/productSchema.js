@@ -52,7 +52,11 @@ const productSchema = new Schema({
         enum:["Available","Sold out","Discontinued"],
         required: true,
         default:"Available"
-    }
+    },
+    offerPercentage:{
+        type:Number,
+        default:0
+    },
 },{
     timestamps: true
 });

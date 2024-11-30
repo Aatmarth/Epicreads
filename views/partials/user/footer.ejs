@@ -62,11 +62,16 @@
                                 <h4 class="widget-title">My Account</h4><!-- End .widget-title -->
 
                                 <ul class="widget-list">
-                                    <li><a href="login.html">Sign In</a></li>
+                                    <li><% if (locals.user) { %>
+                                        <a href="/logout" class="text-decoration-none btn text-light fs-4 fw-bolder ps-5 ms-5">Logout</a>
+                                        <% }else{ %>
+                                        <a href="/login" id="auth-link" style="position:relative;left: 25px;" class="text-decoration-none btn text-light fs-4 fw-bolder ps-5">Sign in / Sign up</a>
+                                        <% } %></li>55
                                     <li><a href="/cart">View Cart</a></li>
-                                    <li><a href="wishlist.html">My Wishlist</a></li>
-                                    <li><a href="#">My Orders</a></li>
-                                    <li><a href="#">Help</a></li>
+                                    <li><a href="/wishlist">My Wishlist</a></li>
+                                    <li><a href="/myOrders">My Orders</a></li>
+                                    <li><a href="/userProfile">My Account</a></li>
+                                    <li><a href="/myWallet">My Wallet</a></li>
                                 </ul><!-- End .widget-list -->
                             </div><!-- End .widget -->
                         </div><!-- End .col-sm-4 col-lg-2 -->
@@ -84,7 +89,7 @@
                         class="icon-facebook-f"></i></a>
                 <a href="#" class="social-icon social-twitter" title="Twitter" target="_blank"><i
                         class="icon-twitter"></i></a>
-                <a href="#" class="social-icon social-instagram" title="Instagram" target="_blank"><i
+                <a href="https://www.instagram.com/aatmarth?igsh=MWVwZTQya21wbDJ6dA==" class="social-icon social-instagram" title="Instagram" target="_blank"><i
                         class="icon-instagram"></i></a>
                 <a href="#" class="social-icon social-youtube" title="Youtube" target="_blank"><i
                         class="icon-youtube"></i></a>

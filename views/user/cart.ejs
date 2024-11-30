@@ -1,90 +1,85 @@
 <%- include("../partials/user/header.ejs") %>
 
-<main class="main">
-	<div class="page-header text-center" style="background-image: url('assets/images/page-header-bg.jpg')">
-		<div class="container">
-			<h1 class="page-title">Shopping Cart</h1>
-		</div><!-- End .container -->
-	</div><!-- End .page-header -->
-
-	<nav aria-label="breadcrumb" class="breadcrumb-nav">
-		<div class="container">
-			<ol class="breadcrumb">
-				<li class="breadcrumb-item"><a href="/">Home</a></li>
-				<li class="breadcrumb-item"><a href="#">Shop</a></li>
-				<li class="breadcrumb-item active" aria-current="page">Shopping Cart</li>
-			</ol>
-		</div><!-- End .container -->
-	</nav><!-- End .breadcrumb-nav -->
-
-	<div class="page-content">
-		<div class="cart">
+	<main class="main">
+		<div class="page-header text-center" style="background-image: url('assets/images/page-header-bg.jpg')">
 			<div class="container">
-				<div class="row">
-					<div class="col-lg-9">
-						<!-- Main cart content -->
-						<table class="table table-cart table-mobile">
-							<thead>
-								<tr>
-									<th>Product</th>
-									<th>Price</th>
-									<th>Quantity</th>
-									<th>Total</th>
-									<th></th>
-								</tr>
-							</thead>
+				<h1 class="page-title">Shopping Cart</h1>
+			</div><!-- End .container -->
+		</div><!-- End .page-header -->
 
-							<tbody>
-								<% if (cartItems.length === 0) { %>
+		<nav aria-label="breadcrumb" class="breadcrumb-nav">
+			<div class="container">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href="/">Home</a></li>
+					<li class="breadcrumb-item"><a href="#">Shop</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Shopping Cart</li>
+				</ol>
+			</div><!-- End .container -->
+		</nav><!-- End .breadcrumb-nav -->
+
+		<div class="page-content">
+			<div class="cart">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-9">
+							<!-- Main cart content -->
+							<table class="table table-cart table-mobile">
+								<thead>
 									<tr>
-										<td colspan="5" class="text-center">Your cart is empty.</td>
+										<th>Product</th>
+										<th>Price</th>
+										<th>Quantity</th>
+										<th>Total</th>
+										<th></th>
 									</tr>
-								<% } else { %>
-									<% cartItems.forEach(item => { %>
-										<tr data-product-id="<%= item.productId._id %>">
-											<td style="width: 300px;" class="product-col">
-												<div class="product">
-													<figure class="product-media">
-														<a href="#">
-															<img src="/productImages/<%= item.productId.productImage[0] %>" alt="Product image">
-														</a>
-													</figure>
-													<h3 class="product-title">
-														<a class="text-decoration-none" href="#"><%= item.productId.productName %></a>
-													</h3><!-- End .product-title -->
-												</div><!-- End .product -->
-											</td>
-											<td style="width: 50px;" class="price-col">₹<%= item.price %></td>
-											<td class="quantity-col">
-												<div class="cart-product-quantity">
-													<input 
-														type="number" 
-														class="form-control quantity-input" 
-														value="<%= item.quantity %>" 
-														min="1" 
-														max="5" 
-														step="1" 
-														data-decimals="0"
-														onchange="updateCart()" 
-														required>
-												</div><!-- End .cart-product-quantity -->
-											</td>
-											<td class="total-col text-center">₹<%= item.totalPrice %></td>
-											<td class="remove-col">
-												<button class="btn-remove" data-product-id="<%= item.productId._id %>">
-													<i class="icon-close"></i>
-												</button>
-											</td>
-										</tr>
-									<% }) %>
-								<% } %>
-							</tbody>
-						</table><!-- End .table table-cart -->
+								</thead>
 
-						<button onclick="updateCart()" id="update-cart" class="btn btn-outline-success">
-							<span>UPDATE CART</span><i class="icon-refresh"></i>
-						</button>
-						<!-- <div class="cart-discount">
+								<tbody>
+									<% if (cartItems.length===0) { %>
+										<tr>
+											<td colspan="5" class="text-center">Your cart is empty.</td>
+										</tr>
+										<% } else { %>
+											<% cartItems.forEach(item=> { %>
+												<tr data-product-id="<%= item.productId._id %>">
+													<td style="width: 300px;" class="product-col">
+														<div class="product">
+															<figure class="product-media">
+																<a href="#">
+																	<img src="/productImages/<%= item.productId.productImage[0] %>"
+																		alt="Product image">
+																</a>
+															</figure>
+															<h3 class="product-title">
+																<a class="text-decoration-none" href="#">
+																	<%= item.productId.productName %>
+																</a>
+															</h3><!-- End .product-title -->
+														</div><!-- End .product -->
+													</td>
+													<td style="width: 50px;" class="price-col">₹<%= item.price %>
+													</td>
+													<td class="quantity-col">
+														<div class="cart-product-quantity">
+															<input type="number" class="form-control quantity-input"
+																value="<%= item.quantity %>" min="1" max="5" step="1"
+																data-decimals="0" onchange="updateCart()" required>
+														</div><!-- End .cart-product-quantity -->
+													</td>
+													<td class="total-col text-center">₹<%= item.totalPrice %>
+													</td>
+													<td class="remove-col">
+														<button class="btn-remove"
+															data-product-id="<%= item.productId._id %>">
+															<i class="icon-close"></i>
+														</button>
+													</td>
+												</tr>
+												<% }) %>
+													<% } %>
+								</tbody>
+							</table><!-- End .table table-cart -->
+							<!-- <div class="cart-discount">
 							<form action="#">
 								<div class="input-group">
 									<input type="text" class="form-control" required placeholder="coupon code">
@@ -96,40 +91,45 @@
 								</div>
 							</form>
 						</div> -->
-					</div><!-- End .col-lg-9 -->
+						</div><!-- End .col-lg-9 -->
 
-					<!-- Ensure that the aside section is in the same row and takes up col-lg-3 -->
-					<aside class="col-lg-3">
-						<div class="summary summary-cart">
-							<h3 class="summary-title">Cart Total</h3>
-							<table class="table table-summary">
-								<tbody>
-									<tr class="summary-subtotal">
-										<td>Subtotal:</td>
-										<td>₹<%= subtotal.toFixed(2) %></td>
-									</tr>
-									<tr class="summary-shipping">
-										<td>Shipping Charge:</td>
-										<td>₹<%= shippingCharge.toFixed(2) %></td>
-									</tr>
-									<tr class="summary-total">
-										<td>Total:</td>
-										<td>₹<%= total.toFixed(2) %></td>
-									</tr>
-								</tbody>
-							</table>
-							<a href="/checkout" class="btn btn-outline-success btn-block mt-5">PROCEED TO CHECKOUT</a>
-						</div><!-- End .summary-cart -->
+						<!-- Ensure that the aside section is in the same row and takes up col-lg-3 -->
+						<aside class="col-lg-3">
+							<div class="summary summary-cart">
+								<h3 class="summary-title">Cart Total</h3>
+								<table class="table table-summary">
+									<tbody>
+										<tr class="summary-subtotal">
+											<td>Subtotal:</td>
+											<td>₹<%= subtotal.toFixed(2) %>
+											</td>
+										</tr>
+										<tr class="summary-shipping">
+											<td>Shipping Charge:</td>
+											<td>₹<%= shippingCharge.toFixed(2) %>
+											</td>
+										</tr>
+										<tr class="summary-total">
+											<td>Total:</td>
+											<td>₹<%= total.toFixed(2) %>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<a href="/chec
+								kout" class="btn btn-outline-success btn-block mt-5">PROCEED TO
+									CHECKOUT</a>
+							</div><!-- End .summary-cart -->
 
-						<a href="/shop" class="btn btn-outline-success btn-block mb-3">
-							<span>CONTINUE SHOPPING</span><i class="icon-refresh"></i>
-						</a>
-					</aside><!-- End .col-lg-3 -->
-				</div><!-- End .row -->
-			</div><!-- End .container -->
-		</div><!-- End .cart -->
-	</div><!-- End .page-content -->
-</main><!-- End .main -->
+							<a href="/shop" class="btn btn-outline-success btn-block mb-3">
+								<span>CONTINUE SHOPPING</span><i class="icon-refresh"></i>
+							</a>
+						</aside><!-- End .col-lg-3 -->
+					</div><!-- End .row -->
+				</div><!-- End .container -->
+			</div><!-- End .cart -->
+		</div><!-- End .page-content -->
+	</main><!-- End .main -->
 
 	<!-- Plugins JS File -->
 	<script src="assets/js/jquery.min.js"></script>
@@ -139,6 +139,7 @@
 	<script src="assets/js/superfish.min.js"></script>
 	<script src="assets/js/owl.carousel.min.js"></script>
 	<script src="assets/js/bootstrap-input-spinner.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<!-- Main JS File -->
 	<script src="assets/js/main.js"></script>
 
@@ -166,11 +167,18 @@
 				$('.total-col').each(function () {
 					subtotal += parseFloat($(this).text().replace('₹', ''));
 				});
-				const shippingCharge = parseFloat($('.summary-shipping td:last-child').text().replace('₹', ''));
+
+				// Determine shipping charge based on subtotal
+				let shippingCharge = subtotal > 1000 ? 0 : 60;
+				if(subtotal==0){
+					shippingCharge=0;
+				}
+				console.log(shippingCharge)
 				const total = subtotal + shippingCharge;
 
 				// Update the subtotal and total in the cart summary
 				$('.summary-subtotal td:last-child').text(`₹${subtotal.toFixed(2)}`);
+				$('.summary-shipping td:last-child').text(`₹${shippingCharge.toFixed(2)}`);
 				$('.summary-total td:last-child').text(`₹${total.toFixed(2)}`);
 			}
 
@@ -184,52 +192,83 @@
 		});
 	</script>
 	<script>
-		function updateCart(){
+		function updateCart() {
 
-	
-		const quantities = {};
-		
-		document.querySelectorAll('.quantity-input').forEach(input => {
-			const productId = input.closest('tr').getAttribute('data-product-id');
-			quantities[productId] = input.value;
-		});
-	
-		fetch('/updateCart', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ quantities })
-		})
-		.then(response => response.json())
-		
-		.catch(error => console.error('Error updating cart:', error));
-	}
-	</script>
-	<script>document.querySelectorAll('.btn-remove').forEach(button => {
-		button.addEventListener('click', function() {
-			const productId = this.getAttribute('data-product-id');
-			const row = this.closest('tr');
-	
-			fetch(`/removeProductFromCart`, {
+
+			const quantities = {};
+
+			document.querySelectorAll('.quantity-input').forEach(input => {
+				const productId = input.closest('tr').getAttribute('data-product-id');
+				quantities[productId] = input.value;
+			});
+
+			fetch('/updateCart', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ productId })
+				body: JSON.stringify({ quantities })
 			})
-			.then(response => response.json())
-			.then(data => {
-				if (data.success) {
-					// Remove the product row from the table
-					row.remove();
-					// Optionally update the cart total
-					updateCartTotal();
-				} else {
-					alert('Error removing product');
-				}
-			})
-			.catch(error => console.error('Error removing product:', error));
-		});
-	});
+				.then(response => response.json())
+
+				.catch(error => console.error('Error updating cart:', error));
+		}
+	</script>
+	<script>
+		document.querySelectorAll('.btn-remove').forEach(button => {
+			button.addEventListener('click', function () {
+				const productId = this.getAttribute('data-product-id');
+				const row = this.closest('tr');
+
+				// Trigger SweetAlert confirmation dialog
+				Swal.fire({
+					title: 'Are you sure?',
+					text: "Do you want to remove this product from the cart?",
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonColor: '#3085d6',
+					cancelButtonColor: '#d33',
+					confirmButtonText: 'Yes, remove it!',
+					cancelButtonText: 'Cancel'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						fetch(`/removeProductFromCart`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({ productId })
+						})
+							.then(response => response.json())
+							.then(data => {
+								if (data.success) {
+									// Show success message
+									Swal.fire({
+										title: 'Removed!',
+										text: 'The product has been removed from your cart.',
+										icon: 'success',
+										showConfirmButton: false,  // Hide the OK button
+										timer: 1500
+									}).then(() => {
+										// Remove the product row from the table
+										row.remove();
+
+										// Update the cart subtotal, shipping, and total
+										document.querySelector('.summary-subtotal td:last-child').textContent = `₹${data.subtotal.toFixed(2)}`;
+										document.querySelector('.summary-shipping td:last-child').textContent = `₹${data.shippingCharge.toFixed(2)}`;
+										document.querySelector('.summary-total td:last-child').textContent = `₹${data.total.toFixed(2)}`;
+									});
+								} else {
+									Swal.fire(
+										'Error!',
+										'There was an issue removing the product.',
+										'error'
+									);
+								}
+							})
+							.catch(error => console.error('Error removing product:', error));
+						}
+					});
+				});
+			});
 	</script>

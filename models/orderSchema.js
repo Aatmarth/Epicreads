@@ -2,11 +2,23 @@ const mongoose= require("mongoose");
 const {Schema}= mongoose;
 const {v4:uuidv4}= require("uuid");
 
+const generateId = () => {
+    const uuid = uuidv4().replace(/[^0-9]/g, '').slice(0, 20);
+    return `#INV${uuid}`
+    
+}
+
+
 const orderSchema = new Schema({
     orderId: {
         type:String,
-        default: ()=> uuidv4(),
+        default: generateId,
         unique: true
+    },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
     orderedItems: [{
         productId: {
@@ -21,7 +33,13 @@ const orderSchema = new Schema({
         price: {
             type: Number,
             default: 0
-        }
+        },
+        status:{
+            type: String,
+            required: true,
+            enum: ["Pending","Shipped","Cancelled","Delivered","Return Requesting","Returned"],
+            default: "Pending"
+        },
     }],
     totalPrice: {
         type: Number,
@@ -67,25 +85,30 @@ const orderSchema = new Schema({
     }],
     paymentMethod: {
         type: String,
-        required: true
-    },
-    InvoiceDate: {
-        type: Date
-    },
-    status:{
-        type: String,
         required: true,
-        default: ["Pending","Rejected","Completed","Return Request","Returned"]
+        enum: ["Cash on delivery","Razorpay","Wallet","Payment Pending"],
     },
-    createdOn:{
-        type: Date,
-        default: Date.now,
-        required: true
+    status: {
+        type: String,
+        enum: [
+            "Pending",
+            "Shipped",
+            "Cancelled",
+            "Delivered",
+            "Return Requesting",
+            "Returned",
+            "Partially Cancelled",
+            "Partially Returned",
+        ],
+        default: "Pending",
     },
     couponApplied: {
         type: Boolean,
         default:0
     }
+},
+{
+    timestamps: true
 })
 
 const Order = mongoose.model("Order", orderSchema);

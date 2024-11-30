@@ -1,6 +1,5 @@
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
-const Author = require("../../models/authorSchema");
 const upload = require("../../middlewares/multer");
 
 const productInfo = async (req, res) => {
@@ -45,8 +44,7 @@ const productInfo = async (req, res) => {
 const getAddProduct = async (req, res) => {
   try {
     const categories = await Category.find({});
-    const author = await Author.find({});
-    res.render("addProduct", { categories: categories, author: author });
+    res.render("addProduct", { categories: categories });
   } catch (error) {
     console.log(error.message, "Error in get add product");
     res.status(500).send("Internal server error");
@@ -67,16 +65,16 @@ const addProduct = async (req, res) => {
       offerPrice: req.body.offerPrice,
       pageCount: req.body.pageCount,
       quantity: req.body.quantity,
-      productImage: req.files.map((file) => file.filename), // Store filenames
+      productImage: req.files.map((file) => file.filename), 
       status: req.body.status,
     };
 
     const newProduct = new Product(productData);
     await newProduct.save();
-    res.redirect("/admin/products");
+    res.redirect("/admin/products?success=true");
   } catch (error) {
-    console.log(error.message, "Error in add product");
-    res.status(500).send("Internal server error");
+    console.error(error.message, "Error in add product");
+    res.redirect("/admin/products?success=false");
   }
 };
 
@@ -98,13 +96,11 @@ const loadEditProduct = async (req, res) => {
     let id = req.query.id;
     const product = await Product.findOne({ _id: id }).populate("category");
     const categories = await Category.find({});
-    const author = await Author.find({});
     console.log(product);
     
     res.render("editProduct", {
       product: product,
       categories: categories,
-      author: author,
     });
   } catch (error) {
     console.log(error.message, "Error in edit product");
@@ -148,10 +144,10 @@ const editProduct = async (req, res) => {
     };
 
     await Product.updateOne({ _id: id }, { $set: productData });
-    res.redirect("/admin/products");
+    res.redirect("/admin/products?success=true");
   } catch (error) {
-    console.log(error.message, "Error in edit product");
-    res.status(500).send("Internal server error");
+    console.error(error.message, "Error in add product");
+    res.redirect("/admin/products?success=false");
   }
 };
 

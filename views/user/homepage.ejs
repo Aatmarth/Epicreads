@@ -1,4 +1,68 @@
 <%- include("../partials/user/header.ejs") %>
+    <style>
+        .error-message {
+            color: red;
+            font-size: 1rem;
+            display: none;
+        }
+
+
+        .box:hover {
+            animation-play-state: paused;
+        }
+
+        .box {
+            background-color: darkgray;
+            top: 70px;
+            left: 43%;
+            margin-bottom: 150px;
+            background-color: black;
+            position: relative;
+            width: 200px;
+            height: 300px;
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+            animation: animate 30s linear infinite;
+        }
+
+        @keyframes animate {
+            0% {
+                transform: perspective(1000px) rotateY(0deg);
+            }
+
+            100% {
+                transform: perspective(1000px) rotateY(360deg);
+            }
+        }
+
+        .box span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            transform: rotateY(calc(var(--i) * 45deg)) translateZ(240px);
+        }
+
+        .box span::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .box span img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+
     <main class="main">
         <div class="intro-section pt-lg-2">
             <div class="container">
@@ -49,7 +113,7 @@
                             </div><!-- End .heading-left -->
 
                             <div class="heading-right">
-                                <a href="category.html" class="title-link">View more Products <i
+                                <a href="/shop?categories=&minPrice=0&maxPrice=5000&outOfStock=false&sortby=old-arrivals" class="title-link">View more Products <i
                                         class="icon-long-arrow-right"></i></a>
                             </div><!-- End .heading-right -->
                         </div><!-- End .header-flex -->
@@ -95,8 +159,13 @@
                                             <%=products.authorname%>
                                         </div><!-- End .product-cat -->
                                         <div class="product-price">
-                                            <span class="new-price">₹<%=products.offerPrice%></span>
-                                        </div><!-- End .product-price -->
+                                            <% if (products.offerPercentage) { %>
+                                                ₹<%= (products.productPrice * (100 - products.offerPercentage)) / 100 %>
+                                             <div class="ms-2 text-danger fw-bolder fs-3"><%= products.offerPercentage %>% OFF</div>    
+                                            <% }else{ %>
+                                            ₹<%= products.offerPrice %>
+                                            <% } %>
+                                        </div>
                                         <div class="old-price">
                                             <span class="original-price">₹<%=products.productPrice%></span>
                                         </div>
@@ -110,7 +179,7 @@
                                                         <a href="#" class="btn-product btn-cart disabled"><span>Not
                                                                 Available</span></a>
                                                         <% } %>
-                                                            <a href="#" class="btn-product btn-wishlist"><span>Add to
+                                                            <a onclick="addToWislist('<%=products._id%>')" class="btn-product btn-wishlist"><span>Add to
                                                                     Wishlist</span></a>
                                             </div><!-- End .product-action -->
                                         </div><!-- End .product-footer -->
@@ -133,7 +202,7 @@
                             </div><!-- End .heading-left -->
 
                             <div class="heading-right">
-                                <a href="category.html" class="title-link">View more Products <i
+                                <a href="/shop?categories=&minPrice=0&maxPrice=5000&outOfStock=false&sortby=new-arrivals" class="title-link">View more Products <i
                                         class="icon-long-arrow-right"></i></a>
                             </div><!-- End .heading-right -->
                         </div><!-- End .header-flex -->
@@ -179,18 +248,28 @@
                                             <%=product.author%>
                                         </div><!-- End .product-cat -->
                                         <div class="product-price">
-                                            <span class="new-price">₹<%=product.offerPrice%></span>
-                                        </div><!-- End .product-price -->
+                                            <% if (product.offerPercentage) { %>
+                                                ₹<%= (product.productPrice * (100 - product.offerPercentage)) / 100 %>
+                                             <div class="ms-2 text-danger fw-bolder fs-3"><%= product.offerPercentage %>% OFF</div>    
+                                            <% }else{ %>
+                                            ₹<%= product.offerPrice %>
+                                            <% } %>
+                                        </div>
                                         <div class="old-price">
                                             <span class="original-price">₹<%=product.productPrice%></span>
                                         </div>
 
                                         <div class="product-footer">
                                             <div class="product-action">
-                                                <a onclick="addToCart('<%=products._id%>')"
-                                                    class="btn-product btn-cart"><span>add to cart</span></a>
-                                                <a href="#" class="btn-product btn-wishlist"><span>Add to
-                                                        Wishlist</span></a>
+                                                <% if(product.quantity> 0){ %>
+                                                    <a onclick="addToCart('<%=product._id%>')"
+                                                        class="btn-product btn-cart"><span>add to cart</span></a>
+                                                    <% } else { %>
+                                                        <a href="#" class="btn-product btn-cart disabled"><span>Not
+                                                                Available</span></a>
+                                                        <% } %>
+                                                            <a onclick="addToWislist('<%=product._id%>')" class="btn-product btn-wishlist"><span>Add to
+                                                                    Wishlist</span></a>
                                             </div><!-- End .product-action -->
                                         </div><!-- End .product-footer -->
                                     </div><!-- End .product-body -->
@@ -209,23 +288,29 @@
         <div class="banner-group mb-5">
             <div class="container">
                 <div class="row">
-                    <% for( let i=0; i < categories.length; i++ ) { %>
+                    <% for(let i=0; i < categories.length; i++) { %>
                         <div class="col-md-6 col-lg-4">
                             <div class="banner banner-overlay" style="width: 425px; height: 212.5px;">
                                 <a href="#">
                                     <img src="/categoryImages/<%= categories[i].categoryImage %>" alt="Banner">
                                 </a>
-
                                 <div class="banner-content">
-                                    <h4 class="banner-subtitle text-white"><a class="text-decoration-none" href="#">
+                                    <h4 class="banner-subtitle text-white">
+                                        <a class="text-decoration-none" href="#">
                                             <%= categories[i].description %>
-                                        </a></h4>
-                                    <h3 class="banner-title text-white"><a class="text-decoration-none" href="#">
+                                        </a>
+                                    </h4>
+                                    <h3 class="banner-title text-white">
+                                        <a class="text-decoration-none" href="#">
                                             <%= categories[i].name %>
                                         </a>
                                     </h3><!-- End .banner-title -->
-                                    <a href="#" class="btn border border-light text-light banner-link">Discover Now<i
-                                            class="icon-long-arrow-right"></i></a>
+                                    <!-- Modify the Discover Now button with a route to the shop -->
+                                    <a href="/shop?categories=<%= categories[i]._id %>"
+                                        class="btn border border-light text-light banner-link">
+                                        Discover Now
+                                        <i class="icon-long-arrow-right"></i>
+                                    </a>
                                 </div><!-- End .banner-content -->
                             </div><!-- End .banner -->
                         </div><!-- End .col-lg-4 -->
@@ -238,205 +323,76 @@
     </div><!-- End .page-wrapper -->
     <button id="scroll-top" title="Back to Top"><i class="icon-arrow-up text-success"></i></button>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    <%- include("../partials/user/footer.ejs") %>
-
-        <script>
-            function addToCart(id) {
-                fetch('/addToCart', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ productId: id, quantity: 1 })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Product added to cart successfully!');
-                        } else {
-                            alert('Error adding product to cart: ' + data.message);
-                        }
-                    })
-                    .catch(error => console.error('Error adding product to cart:', error));
-            }
-        </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-        <!-- <% if (locals.message && message.length> 0) { %>
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    $('#signin-modal').modal('show');
-                });
-            </script>
-            <% } %> -->
 
-        <!-- <script>
-                    const nameid = document.getElementById("register-username");
-                    const emailid = document.getElementById("register-email");
-                    const mobileid = document.getElementById("register-mobile");
-                    const passwordid = document.getElementById("register-password");
-                    const error1 = document.getElementById("error1");
-                    const error2 = document.getElementById("error2");
-                    const error3 = document.getElementById("error3");
-                    const error4 = document.getElementById("error4");
-                    const registerForm = document.getElementById("register-form");
-
-                    function nameCheck(e) {
-                        const nameVal = nameid.value;
-                        const namePattern = /^[A-Za-z/s]+$/;
-
-                        if (nameVal.trim() === "") {
-                            error1.style.display = "block";
-                            error1.innerHTML = "Enter a valid name"
-                        } else if (!namePattern.test(nameVal)) {
-                            error1.style.display = "block";
-                            error1.innerHTML = "Name can only contain alphabets and spaces"
-                        } else {
-                            error1.style.display = "none";
-                            error1.innerHTML = "";
-                        }
-                    }
-
-                    function emailCheck(e) {
-                        const emailVal = emailid.value;
-                        const emailPattern = /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/;
-
-                        if (!emailPattern.test(emailVal)) {
-                            error2.style.display = "block";
-                            error2.innerHTML = "Enter a valid email"
-                        } else {
-                            error2.style.display = "none";
-                            error2.innerHTML = "";
-                        }
-                    }
-
-                    function mobileCheck(e) {
-                        const mobileval = mobileid.value;
-
-                        if (mobileval.trim() === "") {
-                            error3.style.display = "block";
-                            error3.innerHTML = "Enter a valid phone number"
-                        } else if (mobileval.lenghth < 10 || mobileval.length > 10) {
-                            error3.style.display = "block"
-                            error3.innerHTML = "Mobile number should consists of 10 digits"
-                        } else {
-                            error3.style.display = "none";
-                            error3.innerHTML = "";
-                        }
-                    }
-
-                    function passwordCheck(e) {
-                        const passwordVal = passwordid.value;
-                        const alphabetic = /[a-zA-Z]/;
-                        const digit = /\d/;
-
-                        if (passwordVal.length < 8) {
-                            error4.style.display = "block";
-                            error4.innerHTML = "Should contain 8 characters"
-                        } else if (!alphabetic.test(passwordVal) || !digit.test(passwordVal)) {
-                            error4.style.display = "block"
-                            error4.innerHTML = "Password should contain both alphabetics and numericals"
-                        } else {
-                            error4.style.display = "none";
-                            error4.innerHTML = "";
-                        }
-                    }
-
-                    document.addEventListener("DOMContentLoaded", () => {
-                        registerForm.addEventListener("submit", (e) => {
-                            nameCheck();
-                            emailCheck();
-                            mobileCheck();
-                            passwordCheck();
-
-                            if (
-                                !nameid ||
-                                !emailid ||
-                                !mobileid ||
-                                !passwordid ||
-                                !error1 ||
-                                !error2 ||
-                                !error3 ||
-                                !error4 ||
-                                !registerForm
-                            ) {
-                                console.error("One or more elements not found");
-                            }
-
-                            if (
-                                error1.innerHTML ||
-                                error2.innerHTML ||
-                                error3.innerHTML ||
-                                error4.innerHTML
-                            ) {
-                                e.preventDefault();
-                            }
-
+    <script>
+        function addToCart(id) {
+            fetch('/addToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: id, quantity: 1 })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'Product added to cart successfully!',
+                            showConfirmButton: false,
+                            timer: 1500
                         })
-                    })
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'warning',
+                            text: 'Login first!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                    }
+                })
+                .catch(error => console.error('Error adding product to cart:', error));
+        }
 
-                </script> -->
-        <style>
-            .error-message {
-                color: red;
-                font-size: 1rem;
-                display: none;
-            }
+        function addToWislist(id) {
+            fetch('/addToWishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: id })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'Product added to wishlist successfully!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'warning',
+                            text: 'Login first!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                    }
+                })
+                .catch(error => console.error('Error adding product to wishlist:', error));
+        }
+    </script>
 
 
-            .box:hover {
-                animation-play-state: paused;
-            }
+    
 
-            .box {
-                background-color: darkgray;
-                top: 70px;
-                left: 43%;
-                margin-bottom: 150px;
-                background-color: black;
-                position: relative;
-                width: 200px;
-                height: 300px;
-                transform-style: preserve-3d;
-                transform: perspective(1000px);
-                animation: animate 30s linear infinite;
-            }
-
-            @keyframes animate {
-                0% {
-                    transform: perspective(1000px) rotateY(0deg);
-                }
-
-                100% {
-                    transform: perspective(1000px) rotateY(360deg);
-                }
-            }
-
-            .box span {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: #fff;
-                transform: rotateY(calc(var(--i) * 45deg)) translateZ(240px);
-            }
-
-            .box span::before {
-                content: "";
-                position: absolute;
-                inset: 0;
-                z-index: 2;
-                box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
-            }
-
-            .box span img {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-        </style>
+    
+    <%- include("../partials/user/footer.ejs") %>

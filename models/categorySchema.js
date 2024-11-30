@@ -19,11 +19,7 @@ const categorySchema = new Schema({
         type: Boolean,
         default: true
     },
-    categoryOffer: {
-        type: Number,
-        default: 0
-    },
-    categoryDiscount: {
+    offerPercentage: {
         type: Number,
         default: 0
     },

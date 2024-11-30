@@ -2,15 +2,10 @@ const mongoose = require("mongoose");
 const {Schema} = mongoose;
 
 const couponSchema = new Schema({
-    couponname: {
+    couponCode: {
         type: String,
         required: true,
         unique: true
-    },
-    createdOn: {
-        type: Date,
-        default: Date.now,
-        required: true
     },
     expireOn: {
         type: Date, 
@@ -27,7 +22,16 @@ const couponSchema = new Schema({
     userId: [{
         type: Schema.Types.ObjectId,
         ref: "User"
-    }]
+    }],
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    createdOn: {
+        type: Date,
+        default: Date.now,
+        required: true
+    }
 })
 
 const Coupon = mongoose.model("Coupon", couponSchema);

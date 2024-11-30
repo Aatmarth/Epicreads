@@ -2,15 +2,16 @@
 
 <div class="container mt-5">
     <h1 class="text-center text-uppercase">User Profile</h1>
+    <h3 class="text-center fw-bolder">Your Referral Code: <%= user.referralCode %></h4>
 
     <!-- Navigation to Other Sections -->
     <div class="text-center mb-5">
         <div class="d-flex justify-content-center">
             <div class="p-3">
-                <a href="/orders" class="btn btn-outline-dark">View Orders</a>
+                <a href="/myOrders" class="btn btn-outline-dark">View Orders</a>
             </div>
             <div class="p-3">
-                <a href="/wallet" class="btn btn-outline-dark">View Wallet</a>
+                <a href="/myWallet" class="btn btn-outline-dark">View Wallet</a>
             </div>
         </div>
     </div>
@@ -65,8 +66,9 @@
                                         </p>
                                     <% } %>
                                     <a href="/editAddress?id=<%= primaryAddress._id %>" class="btn btn-primary">Edit</a>
-                                    <a href="#" class="btn btn-danger delete-address" data-id="<%= primaryAddress._id %>">Delete</a>
-
+                                    <% if (addresses.length > 1) { %>
+                                        <a href="/deleteAddress?id=<%= primaryAddress._id %>" class="btn btn-danger delete-address" data-id="<%= primaryAddress._id %>">Delete</a>
+                                    <% } %>
                                 </div>
                             </div>
                         <% } else { %>

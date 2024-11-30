@@ -8,7 +8,6 @@ const Category = require("../../models/categorySchema");
 const Cart = require("../../models/cartSchema");
 const Address = require("../../models/addressSchema");
 
-
 const loadhome = async (req, res) => {
   try {
     const products = await Product.find({ isListed: true }).populate({
@@ -23,7 +22,7 @@ const loadhome = async (req, res) => {
     const filteredProductNewArrivals = newArrivals.filter(
       (product) => product.category
     );
-      const user = req.session.user;
+    const user = req.session.user;
 
     if (user) {
       const userData = await User.findOne({ _id: user });
@@ -43,15 +42,28 @@ const loadhome = async (req, res) => {
     }
   } catch (error) {
     console.log(error.message + "home page not found");
-    res.status(500).send("Server error");
+    res.redirect("/pageNotFound");
   }
 };
+
+const loadPageNotFound = async (req, res) => {
+  try {
+    res.render("pageNotFound");
+  } catch (error) {
+    console.log(error.message, "Error in load page not found");
+    res.redirect("/pageNotFound")
+  }
+};
+
 
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 async function sendEmail(email, otp) {
+  console.log(process.env.NODEMAILER_EMAIL,"env email");
+  console.log(process.env.NODEMAILER_PASSWORD,"env email pass");
+
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -83,7 +95,7 @@ const register = async (req, res) => {
   try {
     console.log(req.body);
 
-    const { name, email, mobile, password } = req.body;
+    const { name, email, mobile, password, referralCode } = req.body;
 
     const findUser = await User.findOne({ email });
     if (findUser) {
@@ -95,18 +107,17 @@ const register = async (req, res) => {
     }
 
     const otp = generateOtp();
+    console.log(otp,"otp");
     const emailSent = await sendEmail(email, otp);
-    if (!emailSent) {
-      return res.json("email not sent");
-    }
+    console.log(emailSent,"emailsent");
 
     req.session.userOtp = otp;
-    req.session.userData = { name, mobile, email, password };
+    req.session.userData = { name, mobile, email, password, referralCode };
     res.render("otpVerification");
     console.log("Otp sent", otp);
   } catch (error) {
     console.error(error.message + " error in register");
-    res.status(500).send("Server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -116,7 +127,7 @@ const securePassword = async (password) => {
     return passwordHash;
   } catch (error) {
     console.error(error.message + " error in securePassword");
-    res.status(500).send("Server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -131,12 +142,36 @@ const verifyOtp = async (req, res) => {
       const user = req.session.userData;
       console.log("user", user);
 
+      let referralAmount = 100;
+      let referrer;
+      let isVerifiedCode= false;
+      if (user.referralCode) {
+        referrer = await User.findOne({ referralCode: user.referralCode });
+        if (referrer) {
+          isVerifiedCode= true;
+          referrer.wallet += referralAmount;
+          referrer.walletHistory.push({
+            type: "Credit",
+            amount: referralAmount,
+            description: `Referral bonus for referring ${user.name}`,
+          });
+          await referrer.save();
+        }
+      }
+
       const passwordHash = await securePassword(user.password);
       const saveUserData = new User({
         name: user.name,
         email: user.email,
         mobile: user.mobile,
         password: passwordHash,
+        referredBy: referrer ? referrer._id : null,
+        walletHistory: isVerifiedCode? [{
+          type: "Credit",
+          amount: referralAmount,
+          description: `Referral bonus`
+        }] : [],
+        wallet: isVerifiedCode? referralAmount : 0,
       });
       await saveUserData.save();
       req.session.user = saveUserData._id;
@@ -150,7 +185,7 @@ const verifyOtp = async (req, res) => {
     }
   } catch (error) {
     console.error(error.message + " error in verifyOtp");
-    res.status(500).send("Server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -178,16 +213,14 @@ const resendOtp = async (req, res) => {
         .status(200)
         .json({ success: true, message: "OTP Resend Successfully" });
     } else {
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to resend OTP. Please try again later",
-        });
+      res.status(500).json({
+        success: false,
+        message: "Failed to resend OTP. Please try again later",
+      });
     }
   } catch (error) {
     console.error(error.message + " error in resendOtp");
-    res.status(500).send("Server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -212,6 +245,7 @@ const login = async (req, res) => {
     }
 
     req.session.user = findUser._id;
+    console.log("user", req.session.user)
     res.redirect("/");
   } catch (error) {
     console.error(error.message + " error in login");
@@ -221,25 +255,22 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    // req.session.destroy((err)=>{
-    //     if(err){
-    //         console.error("Session Destruction error",err.message);
-    //         res.status(500).send("Server error");
-    //     }
-    //     return res.redirect("/");
-    // });
     req.session.user = null;
     return res.redirect("/");
   } catch (error) {
     console.error(error.message + " error in logout");
-    res.status(500).send("Server error");
+    res.redirect("/pageNotFound");
   }
 };
 
 const loadProductPage = async (req, res) => {
   try {
     const productId = req.query.id;
-    const product = await Product.findById(productId).populate("category");
+
+    const product = await Product.findOne({ _id: productId}).populate("category")
+    if(!product){
+      return res.redirect("/pageNotFound")
+    }
     const relatedProducts = await Product.find({
       category: product.category,
     }).limit(4);
@@ -255,41 +286,151 @@ const loadProductPage = async (req, res) => {
     }
   } catch (error) {
     console.log(error.message, "Error in load product page");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
 const loadShop = async (req, res) => {
   try {
+    const { categories, minPrice, maxPrice, outOfStock, sortby, page = 1, limit = 8 } = req.query;
+
+     const currentPage = parseInt(page);
+     const perPage = parseInt(limit);
+
+    const categoryFilter = categories
+      ? { _id: { $in: categories.split(",") } }
+      : {};
+
+    const priceFilter = {
+      productPrice: {
+        $gte: minPrice ? parseFloat(minPrice) : 0,
+        $lte: maxPrice ? parseFloat(maxPrice) : Infinity,
+      },
+    };
+
+    const stockFilter = outOfStock === "true" ? {} : { isListed: true };
+
     const category = await Category.find({});
-    const products = await Product.find({ isListed: true }).populate({
+
+    let products = await Product.find({
+      ...priceFilter,
+      ...stockFilter,
+    }).populate({
       path: "category",
-      match: { isListed: true },
-    });
+      match: { ...categoryFilter },
+    })
+    
     const filteredProducts = products.filter((product) => product.category);
+    switch (sortby) {
+      case "a-z":
+        filteredProducts.sort((a, b) =>
+          a.productName.localeCompare(b.productName)
+        );
+        break;
+      case "z-a":
+        filteredProducts.sort((a, b) =>
+          b.productName.localeCompare(a.productName)
+        );
+        break;
+      case "low-to-high":
+        filteredProducts.sort((a, b) => a.offerPrice - b.offerPrice);
+        break;
+      case "high-to-low":
+        filteredProducts.sort((a, b) => b.offerPrice - a.offerPrice);
+        break;
+      case "new-arrivals":
+        filteredProducts.sort((a, b) => b.createdAt - a.createdAt);
+        break;
+      case "old-arrivals":
+        filteredProducts.sort((a, b) => a.createdAt - b.createdAt);
+        break;
+      default:
+        break;
+    }
+
+    const totalProducts = filteredProducts.length; 
+    const paginatedProducts = filteredProducts.slice((currentPage - 1) * perPage, currentPage * perPage);
     if (req.session.user) {
-      const user = req.session.user;
-      const userData = await User.findOne({ _id: user });
+      const user = await User.findOne({ _id: req.session.user });
       res.render("shop", {
-        user: userData,
+        user,
         categories: category,
-        products: filteredProducts,
+        products: paginatedProducts,
+        selectedCategories: categories ? categories.split(",") : [],
+        minPrice: minPrice || "",
+        maxPrice: maxPrice || "",
+        outOfStock: outOfStock || "false", 
+        sortby: sortby,
+        totalProducts,
+      currentPage, 
+      limit: perPage,
       });
     } else {
-      res.render("shop", { categories: category, products: filteredProducts });
+      res.render("shop", {
+        categories: category,
+        products: paginatedProducts,
+        selectedCategories: categories ? categories.split(",") : [], 
+        minPrice: minPrice || "", 
+        maxPrice: maxPrice || "", 
+        outOfStock: outOfStock || "false",
+        sortby: sortby ,
+        totalProducts, 
+      currentPage,
+      limit: perPage,
+      });
     }
   } catch (error) {
-    console.log(error.message, "Error in load category boxed");
-    res.status(500).send("Internal server error");
+    console.log(error.message, "Error in loadShop controller");
+    res.redirect("/pageNotFound");
   }
 };
+
+
+const searchProducts = async (req, res) => {
+  const query = req.query.q;
+  try {
+    const { categories, minPrice, maxPrice, outOfStock, sortby, page = 1, limit = 8 } = req.query;
+
+    const currentPage = parseInt(page);
+    const perPage = parseInt(limit);
+
+    const category = await Category.find({});
+
+    const products = await Product.find({
+      $or: [
+          { productName: { $regex: query, $options: 'i' } },
+          { productDescription: { $regex: query, $options: 'i' } }
+      ]
+  });
+
+    const totalProducts = products.length; 
+    
+    
+      res.render('shop', { 
+        categories: category,
+        products: products,
+        selectedCategories: categories ? categories.split(",") : [], 
+        minPrice: minPrice || "", 
+        maxPrice: maxPrice || "", 
+        outOfStock: outOfStock || "false",
+        sortby: sortby , 
+        totalProducts, 
+      currentPage,
+      limit: perPage,
+       }); 
+  } catch (err) {
+      console.log(err.message, "Error in search products");
+      res.status(500).send("Internal server error");
+  }
+};
+
 
 const loadLogin = async (req, res) => {
   try {
     res.render("login");
   } catch (error) {
     console.log(error.message, "Error in load login");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -298,7 +439,7 @@ const loadRegister = async (req, res) => {
     res.render("register");
   } catch (error) {
     console.log(error.message, "Error in load register");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -307,7 +448,7 @@ const loadForgotPassword = async (req, res) => {
     res.render("forgotPassword");
   } catch (error) {
     console.log(error.message, "Error in load forgot password");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -331,7 +472,7 @@ const forgotPassword = async (req, res) => {
     res.render("otpResetPassword");
   } catch (error) {
     console.log(error.message, "Error in forgot password");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -340,7 +481,7 @@ const loadOtpResetPassword = async (req, res) => {
     res.render("otpResetPassword");
   } catch (error) {
     console.log(error.message, "Error in load otp reset password");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -354,7 +495,6 @@ const otpResetPassword = async (req, res) => {
       console.log("email", email);
       console.log("user email", email);
 
-      // Find the user by email to confirm the user exists
       const user = await User.findOne({ email });
       if (!user) {
         return res
@@ -362,11 +502,9 @@ const otpResetPassword = async (req, res) => {
           .json({ success: false, message: "User not found" });
       }
 
-      // Store user ID in session to identify the user in the next step
       req.session.user = user._id;
       console.log("OTP verified for", user.email);
 
-      // Redirect to the new password page
       res.json({ success: true, redirectUrl: "/resetPassword" });
     } else {
       res
@@ -375,7 +513,7 @@ const otpResetPassword = async (req, res) => {
     }
   } catch (error) {
     console.error(error.message + " error in otpResetPassword");
-    res.status(500).send("Server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -384,7 +522,7 @@ const loadResetPassword = async (req, res) => {
     res.render("resetPassword");
   } catch (error) {
     console.log(error.message, "Error in load reset password");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -407,7 +545,6 @@ const ResetPassword = async (req, res) => {
 
     console.log("updated User");
 
-    // Clear session after successful password reset
     req.session.user = null;
     console.log("Session cleared");
 
@@ -416,7 +553,7 @@ const ResetPassword = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message + " Error in reset password");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -424,22 +561,24 @@ const loadUserProfile = async (req, res) => {
   try {
     const user = req.session.user;
     console.log("Session User ID:", user);
-    
+
     const userData = await User.findById(user);
-    
+
     if (!userData) {
       return res.render("login", { message: "User logged out" });
     }
-    
+
     const addressData = await Address.findOne({ userId: user });
-    
-    res.render("userProfile", { user: userData, addresses: addressData ? addressData.address : [] });
+
+    res.render("userProfile", {
+      user: userData,
+      addresses: addressData ? addressData.address : [],
+    });
   } catch (error) {
     console.log(error.message, "Error in load user profile");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
-
 
 const loadEditProfile = async (req, res) => {
   try {
@@ -449,13 +588,13 @@ const loadEditProfile = async (req, res) => {
     res.render("editProfile", { user: userData });
   } catch (error) {
     console.log(error.message, "Error in load edit profile");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
 const editProfile = async (req, res) => {
   try {
-    const { name, phone} = req.body;
+    const { name, phone } = req.body;
     const user = req.session.user;
     const userData = await User.findOne({ _id: user });
     if (userData) {
@@ -469,7 +608,7 @@ const editProfile = async (req, res) => {
     }
   } catch (error) {
     console.log(error.message, "Error in edit profile");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -480,7 +619,7 @@ const loadChangePassword = async (req, res) => {
     res.render("changePassword", { user: userData });
   } catch (error) {
     console.log(error.message, "Error in load change password");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -505,7 +644,7 @@ const changePassword = async (req, res) => {
       return res.render("changePassword", {
         user: userData,
         message: "New password cannot be the same as the old password",
-        showAlert: true
+        showAlert: true,
       });
     }
 
@@ -517,33 +656,35 @@ const changePassword = async (req, res) => {
       req.session.user = userData._id;
       return res.render("changePassword", {
         user: userData,
-        success: true
+        success: true,
       });
     } else {
       return res.render("changePassword", {
         user: userData,
         message: "Incorrect old password",
-        showAlert: true
+        showAlert: true,
       });
     }
   } catch (error) {
     console.log(error.message, "Error in change password");
-    return res.status(500).send("Internal server error");
+    return res.redirect("/pageNotFound");
   }
 };
-
 
 const loadAddAddress = async (req, res) => {
   try {
     const user = req.session.user;
     const userData = await User.findById(user);
-    
+
     const addressData = await Address.findOne({ userId: user });
-    
-    res.render("addAddress", { user: userData, addresses: addressData ? addressData.address : [] });
+
+    res.render("addAddress", {
+      user: userData,
+      addresses: addressData ? addressData.address : [],
+    });
   } catch (error) {
     console.log(error.message, "Error in load add address");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
@@ -561,7 +702,7 @@ const addAddress = async (req, res) => {
         state,
         pincode,
         phone,
-        email
+        email,
       };
 
       const addressDoc = await Address.findOne({ userId: user });
@@ -571,78 +712,96 @@ const addAddress = async (req, res) => {
       } else {
         const newAddressDoc = new Address({
           userId: user,
-          address: [newAddress]
+          address: [newAddress],
         });
         await newAddressDoc.save();
       }
 
       res.redirect("/userProfile");
+      
     } else {
-      res.render("login", { message: "User logged out"});
+      res.render("login", { message: "User logged out" });
     }
   } catch (error) {
     console.log(error.message, "Error in add address");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
-// 
+//
 
 const loadEditAddress = async (req, res) => {
   try {
-    const addressId = req.query.id; // Getting the address ID from query params
-    const userId = req.session.user; // Assuming you're storing the user ID in the session
+    const addressId = req.query.id;
+    const userId = req.session.user;
 
-    // Find the user's document containing the address array
     const userAddress = await Address.findOne({ userId });
 
-    if(!userId){
+    if (!userId) {
       return res.render("login", { message: "User logged out" });
     }
 
     if (!userAddress) {
-      return res.status(404).send('User not found');
+      return res.status(404).send("User not found");
     }
 
-    // Find the specific address within the address array
-    const address = userAddress.address.find(addr => addr._id.toString() === addressId);
+    const address = userAddress.address.find(
+      (addr) => addr._id.toString() === addressId
+    );
 
     if (!address) {
-      return res.status(404).send('Address not found');
+      return res.status(404).send("Address not found");
     }
 
-    // Render the view with the specific address
-    res.render('editAddress', { address });
+    res.render("editAddress", { address });
   } catch (error) {
     console.log(error.message, "Error in load edit address");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
   }
 };
 
 const editAddress = async (req, res) => {
   try {
     const addressId = req.query.id;
-    const { addressType, customAddressType, name, city, state, pincode, phone, email } = req.body;
+    const {
+      addressType,
+      customAddressType,
+      name,
+      city,
+      state,
+      pincode,
+      phone,
+      email,
+    } = req.body;
 
-    console.log("Form data:", { addressType, customAddressType, name, city, state, pincode, phone, email });
+    console.log("Form data:", {
+      addressType,
+      customAddressType,
+      name,
+      city,
+      state,
+      pincode,
+      phone,
+      email,
+    });
     console.log("Address ID:", addressId);
 
-    const updatedAddressType = addressType === 'Other' ? customAddressType : addressType;
+    const updatedAddressType =
+      addressType === "Other" ? customAddressType : addressType;
     console.log("Updated Address Type:", updatedAddressType);
 
-
     const updateData = {
-      'address.$.addressType': updatedAddressType,
-      'address.$.name': name,
-      'address.$.city': city,
-      'address.$.state': state,
-      'address.$.pincode': pincode,
-      'address.$.phone': phone,
-      'address.$.email': email,
+      "address.$.addressType": updatedAddressType,
+      "address.$.name": name,
+      "address.$.city": city,
+      "address.$.state": state,
+      "address.$.pincode": pincode,
+      "address.$.phone": phone,
+      "address.$.email": email,
     };
 
     const updatedAddress = await Address.findOneAndUpdate(
-      { 'address._id': addressId },
+      { "address._id": addressId },
       { $set: updateData },
       { new: true }
     );
@@ -651,21 +810,21 @@ const editAddress = async (req, res) => {
 
     if (!updatedAddress) {
       console.log(`No address found with ID: ${addressId}`);
-      return res.status(404).render('editAddress', {
+      return res.status(404).render("editAddress", {
         address: req.body,
-        errorMessage: "Address not found"
+        errorMessage: "Address not found",
       });
     }
 
-    res.render('editAddress', {
+    res.render("editAddress", {
       address: req.body,
-      successMessage: "Address updated successfully"
+      successMessage: "Address updated successfully",
     });
   } catch (error) {
     console.log(error.message, "Error in updating address");
-    res.status(500).render('editAddress', {
+    res.status(500).render("editAddress", {
       address: req.body,
-      errorMessage: "Internal server error"
+      errorMessage: "Internal server error",
     });
   }
 };
@@ -682,21 +841,34 @@ const deleteAddress = async (req, res) => {
     );
 
     if (!addressDoc) {
-      return res.status(404).send('Address not found');
+      return res.status(404).send("Address not found");
     }
 
-    res.redirect('/userProfile');
+    res.redirect("/userProfile");
   } catch (error) {
     console.log(error.message, "Error in delete address");
-    res.status(500).send("Internal server error");
+    res.redirect("/pageNotFound");
+  }
+};
+
+const loadWallet = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const userData = await User.findById(user).select("wallet walletHistory name");
+    userData.walletHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.render("myWallet", { user: userData });
+  } catch (error) {
+    console.error("Error in loadWallet:", error.message);
+    res.redirect("/pageNotFound");
   }
 };
 
 
 
-
 module.exports = {
   loadhome,
+  loadPageNotFound,
   register,
   verifyOtp,
   resendOtp,
@@ -704,6 +876,7 @@ module.exports = {
   logout,
   loadProductPage,
   loadShop,
+  searchProducts,
   loadLogin,
   loadRegister,
   loadForgotPassword,
@@ -722,4 +895,5 @@ module.exports = {
   loadEditAddress,
   editAddress,
   deleteAddress,
+  loadWallet
 };

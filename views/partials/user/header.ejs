@@ -95,10 +95,10 @@
                             </div><!-- End .compare-dropdown -->
 
                             <div class="wishlist">
-                                <a href="wishlist.html" title="Wishlist" class="text-decoration-none">
+                                <a href="/wishlist" title="Wishlist" class="text-decoration-none">
                                     <div class="icon">
                                         <i class="icon-heart-o"></i>
-                                        <span class="wishlist-count badge">3</span>
+                                        <span class="wishlist-count badge"><%= wishlistCount %></span>
                                     </div>
                                     <p>Wishlist</p>
                                 </a>
@@ -108,7 +108,7 @@
                                 <a href="/cart" class="dropdown-toggle">
                                     <div class="icon">
                                         <i class="icon-shopping-cart"></i>
-                                        <span class="cart-count">2</span>
+                                        <span class="cart-count"><%= cartCount %></span>
                                     </div>
                                     <p>Cart</p>
                                 </a>
@@ -134,7 +134,7 @@
                                     <nav class="side-nav">
                                         <ul class="menu-vertical sf-arrows">
                                             <% for(let data of category){ %>
-                                            <li><a href="#" ><%= data.name %></a></li>
+                                            <li><a href="/shop?categories=<%= data._id %>" ><%= data.name %></a></li>
                                             <% } %>
                                         </ul>
                                     </nav>
@@ -153,10 +153,10 @@
                                         <a href="/shop">Shop</a>
                                     </li>
                                     <li>
-                                        <a href="#">BEST SELLERS</a>
+                                        <a href="/shop?categories=&minPrice=0&maxPrice=5000&outOfStock=false&sortby=old-arrivals">BEST SELLERS</a>
                                     </li>
                                     <li>
-                                        <a href="blog.html">New arrivals</a>
+                                        <a href="/shop?categories=&minPrice=0&maxPrice=5000&outOfStock=false&sortby=new-arrivals">New arrivals</a>
                                     </li>
                                 </ul><!-- End .menu -->
                             </nav><!-- End .main-nav -->

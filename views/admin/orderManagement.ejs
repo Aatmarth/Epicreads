@@ -1,0 +1,193 @@
+<%- include("../partials/admin/header.ejs") %>
+
+<main class="main">
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Order Management</h2>
+
+        <div class="input-group input-group-sm mb-3" style="width: 550px;">
+            <input type="text" class="form-control" id="searchOrder"
+                placeholder="Search orders by Order ID" value="<%= searchQuery %>">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="searchOrders()">Search</button>
+            </div>
+        </div>
+
+        <% if (data.length === 0) { %>
+            <h3 class="text-center">No orders found.</h3>
+        <% } else { %>
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Order ID</th>
+                        <th onclick="sortTable(1)">Customer Name</th>
+                        <th onclick="sortTable(2)">Status</th>
+                        <th onclick="sortTable(3)">Items</th>
+                        <th onclick="sortTable(4)">Total Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="orderTable">
+                    <% data.forEach(order => { %>
+                        <tr>
+                            <td><%= order.orderId %></td>
+                            <td><%= order.userId ? order.userId.name : 'N/A' %></td> 
+                            <td><%= order.status %></td>
+                            <td>
+                                <ul>
+                                    <% order.orderedItems.forEach(item => { %>
+                                        <li>Product: <%= item.productId.productName %> | Quantity: <%= item.quantity %> | Price: ₹<%= item.price.toFixed(2) %></li>
+                                    <% }) %>
+                                </ul>
+                            </td>
+                            <td>₹<%= order.totalPrice.toFixed(2) %></td>
+                            <td class="d-flex action-buttons">
+                                <a href="/admin/orderInfo?id=<%= order._id %>" class="btn btn-info btn-sm">View Full Details</a>
+                                <% if (order.status !== 'Cancelled' && order.status !== 'Return Requesting' && order.status !== 'Returned' && order.status !== 'Delivered' && order.status !== 'Partially Cancelled') { %>
+                                    <button class="btn btn-danger btn-sm ms-1" onclick="cancelOrder('<%= order._id %>')">
+                                        Cancel Order
+                                    </button>
+                                <% } %>
+                                <% if (order.status === 'Return Requesting') { %>
+                                    <button class="btn btn-success btn-sm ms-1" onclick="approveReturnRequest('<%= order._id %>')">
+                                        Accept Request
+                                    </button>
+                                <% } %>
+                            </td>
+                            
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+
+            <!-- Pagination Controls -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="/admin/orders?page=<%= currentPage - 1 %>&search=<%= searchQuery %>">Previous</a>
+                        </li>
+                    <% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                            <a class="page-link" href="/admin/orders?page=<%= i %>&search=<%= searchQuery %>">
+                                <%= i %>
+                            </a>
+                        </li>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="/admin/orders?page=<%= currentPage + 1 %>&search=<%= searchQuery %>">Next</a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        <% } %>
+    </div>
+
+<script>
+    // Function to search orders by customer name
+    function searchOrders() {
+        const searchValue = document.getElementById("searchOrder").value;
+        window.location.href = `/admin/orders?page=1&search=${encodeURIComponent(searchValue)}`;
+    }
+
+    document.getElementById("searchOrder").addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            searchOrders();
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    function cancelOrder(orderId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You want to cancel this order?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.post('/admin/updateOrderStatus', { orderId, newStatus: 'Cancelled' })
+                    .then(response => {
+                        if (response.status === 200) {
+                            Swal.fire(
+                                'Cancelled!',
+                                response.data.message,
+                                'success'
+                            ).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error',
+                                'Unexpected response status',
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire(
+                            'Error',
+                            'Failed to cancel order',
+                            'error'
+                        );
+                        console.error('Error cancelling order:', error);
+                    });
+            }
+        });
+    }
+
+    function approveReturnRequest(orderId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You want to approve this return request?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, approve it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.post('/admin/updateOrderStatus', { orderId, newStatus: 'Returned' })
+                .then(response => {
+                    console.log(response);  // Log the entire response object
+                    if (response.status === 200) {
+                        Swal.fire(
+                            'Approved!',
+                            response.data.message,
+                            'success'
+                        ).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        console.error('Error approving return request:', error.response ? error.response.data : error);
+                        Swal.fire(
+                            'Error',
+                            'Unexpected response status',
+                            'error'
+                        );
+                    }
+                })
+
+                    .catch(error => {
+                        Swal.fire(
+                            'Error',
+                            'Failed to approve return request',
+                            'error'
+                        );
+                        console.error('Error approving return request:', error);
+                    });
+            }
+        });
+    }
+
+
+</script>
+    
+
+<%- include("../partials/admin/footer.ejs") %>
