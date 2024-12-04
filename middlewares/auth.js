@@ -34,7 +34,7 @@ const isBlocked = (req, res, next) => {
         if (!user.isBlocked) {
           next();
         } else {
-          res.render("logIn", { message: "User is blocked by admin" });
+          res.render("login", { message: "User is blocked by admin" });
         }
       } else {
         res.redirect("/login", { message: "User not found" });
