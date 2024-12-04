@@ -44,7 +44,6 @@ const userSchema = new Schema({
     walletHistory: [{
         transactionId: {
             type: String,
-            unique: true,
             default: () => `TRX${Date.now()}${Math.floor(Math.random() * 1000)}`
         },
         type: {
