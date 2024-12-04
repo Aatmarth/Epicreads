@@ -1,5 +1,5 @@
 {
-  "name": "molla-ecommerce-html-template",
+  "name": "epicreads",
   "version": "1.0.0",
   "main": "index.js",
   "directories": {
@@ -7,8 +7,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "testProject": "nodemon index.js",
-    "start": "nodemon index.js"
+    "testProject": "node index.js",
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",

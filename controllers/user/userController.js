@@ -177,7 +177,7 @@ const verifyOtp = async (req, res) => {
       req.session.user = saveUserData._id;
       console.log(saveUserData);
 
-      res.json({ success: true, redirectUrl: "/logIn" });
+      res.json({ success: true, redirectUrl: "/login" });
     } else {
       res
         .status(400)
@@ -231,17 +231,17 @@ const login = async (req, res) => {
     const findUser = await User.findOne({ isAdmin: 0, email: email });
 
     if (!findUser) {
-      return res.render("logIn", { message: "User not found" });
+      return res.render("login", { message: "User not found" });
     }
 
     if (findUser.isBlocked) {
-      return res.render("logIn", { message: "User is blocked by admin" });
+      return res.render("login", { message: "User is blocked by admin" });
     }
 
     const passwordMatch = await bcrypt.compare(password, findUser.password);
 
     if (!passwordMatch) {
-      return res.render("logIn", { message: "Invalid Password" });
+      return res.render("login", { message: "Invalid Password" });
     }
 
     req.session.user = findUser._id;
